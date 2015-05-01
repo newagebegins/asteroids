@@ -28,6 +28,8 @@
 
 #define arrayCount(array) (sizeof(array) / sizeof((array)[0]))
 
+void(*platformLog)(const char *);
+
 inline vec2 Vec2(float x, float y) {
     vec2 result;
     result.x = x;
@@ -232,8 +234,8 @@ static GLuint compileShader(const char *source, GLenum shaderType) {
     if (!compiled) {
         GLchar log[4096];
         glGetShaderInfoLog(shader, sizeof(log), NULL, log);
-        //platformLog("Shader error!\n");
-        //platformLog(log);
+        platformLog("Shader error!\n");
+        platformLog(log);
         shader = 0;
     }
     return shader;

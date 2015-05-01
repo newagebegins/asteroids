@@ -12,7 +12,9 @@ static void debugLog(char *format, ...) {
     OutputDebugString(str);
 }
 
-#define platformLog(buf) debugLog("%s", buf)
+void win32PlatformLog(const char *string) {
+	debugLog("%s", string);
+}
 
 static HDC hDC;
 
@@ -93,6 +95,8 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
+
+	platformLog = &win32PlatformLog;
 
     if (!initGame()) {
         return 1;

@@ -14,7 +14,9 @@
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
-#define platformLog(buf) LOGI("%s", buf)
+void androidPlatformLog(const char *string) {
+	LOGI("%s", string);
+}
 
 #include <sys/time.h>
 
@@ -30,6 +32,7 @@ static int OldCount;
 static int CurrCount;
 
 bool setupGraphics(int screenWidth, int screenHeight) {
+	platformLog = &androidPlatformLog;
     if (!initGame()) {
         platformLog("Failed to initGame()\n");
         return false;
