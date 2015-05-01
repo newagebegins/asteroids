@@ -1,0 +1,10 @@
+/android/bin/
+/android/gen/
+/android/libs/
+/android/obj/
+
+Thumbs.db
+*.suo
+/win32/Debug/
+*.opensdf
+*.sdf
