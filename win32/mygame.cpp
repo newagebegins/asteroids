@@ -100,7 +100,7 @@ struct Asteroid {
 	vec2 position;
 	vec2 velocity;
 	float scale;
-	vec2 polygon[64];
+	vec2 *polygon;
 	int polygonVertexCount;
 	vec2 transformedPolygon[64];
 	vec2 collisionPolygons[128];
@@ -108,6 +108,71 @@ struct Asteroid {
 	int collisionPolygonsCount;
 	MyRectangle bounds;
 };
+
+vec2 asteroidVertices1[] = {
+	Vec2(-0.5f, 0.8f),
+	Vec2(-0.3f, 0.4f),
+	Vec2(-0.9f, 0.4f),
+	Vec2(-0.9f, -0.2f),
+	Vec2(-0.3f, -0.8f),
+	Vec2(0.2f, -0.7f),
+	Vec2(0.5f, -0.8f),
+	Vec2(0.9f, -0.3f),
+	Vec2(0.1f, 0.0f),
+	Vec2(0.9f, 0.2f),
+	Vec2(0.9f, 0.4f),
+	Vec2(0.2f, 0.8f),
+};
+vec2 asteroidCollisionVertices1[128];
+int asteroidCollisionVertexCount1;
+
+vec2 asteroidVertices2[] = {
+	Vec2(-0.4f, 0.7f),
+	Vec2(-0.7f, 0.4f),
+	Vec2(-0.6f, 0.0f),
+	Vec2(-0.7f, -0.3f),
+	Vec2(-0.5f, -0.6f),
+	Vec2(-0.2f, -0.5f),
+	Vec2(0.4f, -0.6f),
+	Vec2(0.8f, -0.1f),
+	Vec2(0.5f, 0.3f),
+	Vec2(0.7f, 0.5f),
+	Vec2(0.4f, 0.7f),
+	Vec2(0.0f, 0.6f),
+};
+vec2 asteroidCollisionVertices2[128];
+int asteroidCollisionVertexCount2;
+
+vec2 asteroidVertices3[] = {
+	Vec2(-0.3f, 0.7f),
+	Vec2(-0.7f, 0.5f),
+	Vec2(-0.7f, -0.3f),
+	Vec2(-0.3f, -0.6f),
+	Vec2(0.3f, -0.6f),
+	Vec2(0.9f, -0.3f),
+	Vec2(0.6f, 0.1f),
+	Vec2(0.7f, 0.4f),
+	Vec2(0.4f, 0.6f),
+	Vec2(0.1f, 0.4f),
+};
+vec2 asteroidCollisionVertices3[128];
+int asteroidCollisionVertexCount3;
+
+vec2 asteroidVertices4[] = {
+	Vec2(-0.3f, 0.5f),
+	Vec2(-0.6f, 0.2f),
+	Vec2(-0.3f, 0.0f),
+	Vec2(-0.7f, -0.2f),
+	Vec2(-0.3f, -0.6f),
+	Vec2(0.1f, -0.2f),
+	Vec2(0.1f, -0.6f),
+	Vec2(0.3f, -0.6f),
+	Vec2(0.6f, -0.2f),
+	Vec2(0.6f, 0.2f),
+	Vec2(0.2f, 0.5f),
+};
+vec2 asteroidCollisionVertices4[128];
+int asteroidCollisionVertexCount4;
 
 struct ShipFragment {
 	vec2 position;
@@ -173,64 +238,23 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 
 	switch (type) {
 	case 1:
-		asteroid->polygonVertexCount = 12;
-		asteroid->polygon[0] = Vec2(-0.5f, 0.8f);
-		asteroid->polygon[1] = Vec2(-0.3f, 0.4f);
-		asteroid->polygon[2] = Vec2(-0.9f, 0.4f);
-		asteroid->polygon[3] = Vec2(-0.9f, -0.2f);
-		asteroid->polygon[4] = Vec2(-0.3f, -0.8f);
-		asteroid->polygon[5] = Vec2(0.2f, -0.7f);
-		asteroid->polygon[6] = Vec2(0.5f, -0.8f);
-		asteroid->polygon[7] = Vec2(0.9f, -0.3f);
-		asteroid->polygon[8] = Vec2(0.1f, 0.0f);
-		asteroid->polygon[9] = Vec2(0.9f, 0.2f);
-		asteroid->polygon[10] = Vec2(0.9f, 0.4f);
-		asteroid->polygon[11] = Vec2(0.2f, 0.8f);
+		asteroid->polygon = asteroidVertices1;
+		asteroid->polygonVertexCount = arrayCount(asteroidVertices1);
 		break;
 
 	case 2:
-		asteroid->polygonVertexCount = 12;
-		asteroid->polygon[0] = Vec2(-0.4f, 0.7f);
-		asteroid->polygon[1] = Vec2(-0.7f, 0.4f);
-		asteroid->polygon[2] = Vec2(-0.6f, 0.0f);
-		asteroid->polygon[3] = Vec2(-0.7f, -0.3f);
-		asteroid->polygon[4] = Vec2(-0.5f, -0.6f);
-		asteroid->polygon[5] = Vec2(-0.2f, -0.5f);
-		asteroid->polygon[6] = Vec2(0.4f, -0.6f);
-		asteroid->polygon[7] = Vec2(0.8f, -0.1f);
-		asteroid->polygon[8] = Vec2(0.5f, 0.3f);
-		asteroid->polygon[9] = Vec2(0.7f, 0.5f);
-		asteroid->polygon[10] = Vec2(0.4f, 0.7f);
-		asteroid->polygon[11] = Vec2(0.0f, 0.6f);
+		asteroid->polygon = asteroidVertices2;
+		asteroid->polygonVertexCount = arrayCount(asteroidVertices2);
 		break;
 
 	case 3:
-		asteroid->polygonVertexCount = 10;
-		asteroid->polygon[0] = Vec2(-0.3f, 0.7f);
-		asteroid->polygon[1] = Vec2(-0.7f, 0.5f);
-		asteroid->polygon[2] = Vec2(-0.7f, -0.3f);
-		asteroid->polygon[3] = Vec2(-0.3f, -0.6f);
-		asteroid->polygon[4] = Vec2(0.3f, -0.6f);
-		asteroid->polygon[5] = Vec2(0.9f, -0.3f);
-		asteroid->polygon[6] = Vec2(0.6f, 0.1f);
-		asteroid->polygon[7] = Vec2(0.7f, 0.4f);
-		asteroid->polygon[8] = Vec2(0.4f, 0.6f);
-		asteroid->polygon[9] = Vec2(0.1f, 0.4f);
+		asteroid->polygon = asteroidVertices3;
+		asteroid->polygonVertexCount = arrayCount(asteroidVertices3);
 		break;
 
 	case 4:
-		asteroid->polygonVertexCount = 11;
-		asteroid->polygon[0] = Vec2(-0.3f, 0.5f);
-		asteroid->polygon[1] = Vec2(-0.6f, 0.2f);
-		asteroid->polygon[2] = Vec2(-0.3f, 0.0f);
-		asteroid->polygon[3] = Vec2(-0.7f, -0.2f);
-		asteroid->polygon[4] = Vec2(-0.3f, -0.6f);
-		asteroid->polygon[5] = Vec2(0.1f, -0.2f);
-		asteroid->polygon[6] = Vec2(0.1f, -0.6f);
-		asteroid->polygon[7] = Vec2(0.3f, -0.6f);
-		asteroid->polygon[8] = Vec2(0.6f, -0.2f);
-		asteroid->polygon[9] = Vec2(0.6f, 0.2f);
-		asteroid->polygon[10] = Vec2(0.2f, 0.5f);
+		asteroid->polygon = asteroidVertices4;
+		asteroid->polygonVertexCount = arrayCount(asteroidVertices4);
 		break;
 	}
 
