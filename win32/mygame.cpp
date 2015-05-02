@@ -95,6 +95,7 @@ inline void initPlayer(Player *player) {
 	player->collisionPolygon[2] = Vec2(0.54f, -0.49f);
 }
 
+#define MAX_ASTEROID_COLLISION_VERTEX_COUNT 64
 struct Asteroid {
 	bool active;
 	vec2 position;
@@ -104,7 +105,7 @@ struct Asteroid {
 	int vertexCount;
 	vec2 transformedPolygon[64];
 	vec2 *collisionTriangles;
-	vec2 transformedCollisionTriangles[128];
+	vec2 transformedCollisionTriangles[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
 	int collisionVertexCount;
 	MyRectangle bounds;
 };
@@ -123,7 +124,7 @@ vec2 asteroidVertices1[] = {
 	Vec2(0.9f, 0.4f),
 	Vec2(0.2f, 0.8f),
 };
-vec2 asteroidCollisionTriangles1[128];
+vec2 asteroidCollisionTriangles1[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
 int asteroidCollisionVertexCount1;
 
 vec2 asteroidVertices2[] = {
@@ -140,7 +141,7 @@ vec2 asteroidVertices2[] = {
 	Vec2(0.4f, 0.7f),
 	Vec2(0.0f, 0.6f),
 };
-vec2 asteroidCollisionTriangles2[128];
+vec2 asteroidCollisionTriangles2[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
 int asteroidCollisionVertexCount2;
 
 vec2 asteroidVertices3[] = {
@@ -155,7 +156,7 @@ vec2 asteroidVertices3[] = {
 	Vec2(0.4f, 0.6f),
 	Vec2(0.1f, 0.4f),
 };
-vec2 asteroidCollisionTriangles3[128];
+vec2 asteroidCollisionTriangles3[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
 int asteroidCollisionVertexCount3;
 
 vec2 asteroidVertices4[] = {
@@ -171,7 +172,7 @@ vec2 asteroidVertices4[] = {
 	Vec2(0.6f, 0.2f),
 	Vec2(0.2f, 0.5f),
 };
-vec2 asteroidCollisionTriangles4[128];
+vec2 asteroidCollisionTriangles4[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
 int asteroidCollisionVertexCount4;
 
 struct ShipFragment {
