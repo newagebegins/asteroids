@@ -74,6 +74,7 @@
   <ItemGroup>
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="mygame.cpp" />
+    <ClCompile Include="mygame_polygon.cpp" />
     <ClCompile Include="mygame_triangulator.cpp" />
     <ClCompile Include="mygame_win32.cpp" />
   </ItemGroup>
@@ -82,6 +83,7 @@
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="mygame.h" />
     <ClInclude Include="mygame_math.h" />
+    <ClInclude Include="mygame_polygon.h" />
     <ClInclude Include="mygame_random.h" />
     <ClInclude Include="mygame_triangulator.h" />
   </ItemGroup>

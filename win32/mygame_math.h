@@ -11,12 +11,6 @@ struct vec2 {
 	float x, y;
 };
 
-struct MyPolygon {
-	vec2 untransformedVertices[64];
-	vec2 vertices[64];
-	int vertexCount;
-};
-
 inline int signum(float x) {
 	if (x > 0) {
 		return 1;

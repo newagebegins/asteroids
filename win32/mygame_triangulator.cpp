@@ -15,7 +15,7 @@ inline int getNextIndex(int index, int vertexCount) {
 	return result;
 }
 
-static int computeSpannedAreaSign(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
+inline int computeSpannedAreaSign(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y) {
 	float area = p1x * (p3y - p2y);
 	area += p2x * (p1y - p3y);
 	area += p3x * (p2y - p1y);
@@ -23,7 +23,7 @@ static int computeSpannedAreaSign(float p1x, float p1y, float p2x, float p2y, fl
 	return result;
 }
 
-static int classifyVertex(int index, int *indices, float *vertices, int vertexCount) {
+inline int classifyVertex(int index, int *indices, float *vertices, int vertexCount) {
 	int prevIndex = getPreviousIndex(index, vertexCount);
 	int previous = indices[prevIndex] * 2;
 	int current = indices[index] * 2;
@@ -99,7 +99,7 @@ struct IntArray {
 	int size;
 };
 
-static void arrayRemoveIndex(IntArray *arr, int index) {
+inline void arrayRemoveIndex(IntArray *arr, int index) {
 	assert(index >= 0 && index < arr->size);
 	for (int i = index; i < (arr->size - 1); ++i) {
 		arr->e[i] = arr->e[i + 1];
@@ -107,12 +107,12 @@ static void arrayRemoveIndex(IntArray *arr, int index) {
 	arr->size--;
 }
 
-static void arrayAdd(IntArray *arr, int x) {
+inline void arrayAdd(IntArray *arr, int x) {
 	arr->e[arr->size] = x;
 	arr->size++;
 }
 
-static void cutEarTip(int earTipIndex, int *indices, IntArray *triangles, int *vertexCount, IntArray *indicesArray, IntArray *vertexTypesArray) {
+inline void cutEarTip(int earTipIndex, int *indices, IntArray *triangles, int *vertexCount, IntArray *indicesArray, IntArray *vertexTypesArray) {
 	arrayAdd(triangles, indices[getPreviousIndex(earTipIndex, *vertexCount)]);
 	arrayAdd(triangles, indices[earTipIndex]);
 	arrayAdd(triangles, indices[getNextIndex(earTipIndex, *vertexCount)]);
@@ -122,7 +122,7 @@ static void cutEarTip(int earTipIndex, int *indices, IntArray *triangles, int *v
 	(*vertexCount)--;
 }
 
-static void triangulate(int vertexCount, int *vertexTypes, int *indices, float *vertices, IntArray *triangles, IntArray *indicesArray, IntArray *vertexTypesArray) {
+inline void triangulate(int vertexCount, int *vertexTypes, int *indices, float *vertices, IntArray *triangles, IntArray *indicesArray, IntArray *vertexTypesArray) {
 	while (vertexCount > 3) {
 		int earTipIndex = findEarTip(vertexCount, vertexTypes, indices, vertices);
 		cutEarTip(earTipIndex, indices, triangles, &vertexCount, indicesArray, vertexTypesArray);

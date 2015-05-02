@@ -27,6 +27,9 @@
     <ClCompile Include="mygame_triangulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mygame_polygon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gl3w.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mygame_random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mygame_polygon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
