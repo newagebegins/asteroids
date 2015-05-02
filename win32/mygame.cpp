@@ -197,6 +197,21 @@ struct ExplosionParticle {
 	float distance;
 };
 
+struct Ufo {
+	bool active;
+	vec2 position;
+	vec2 velocity;
+	float scale;
+	vec2 outlineVertices[8];
+	vec2 transformedOutlineVertices[8];
+	vec2 innerLines[4];
+	vec2 transformedInnerLines[4];
+	vec2 collisionTriangles[64];
+	vec2 transformedCollisionTriangles[64];
+	int collisionVertexCount;
+	MyRectangle bounds;
+};
+
 Input g_input;
 
 static GLint g_positionAttrib;
@@ -214,6 +229,7 @@ static float g_viewportY;
 static float g_viewportWidth;
 static float g_viewportHeight;
 static ExplosionParticle g_explosionParticles[30];
+static Ufo g_ufo;
 
 static void transformAsteroid(Asteroid *asteroid) {
 	mat4 translationMatrix = createTranslationMatrix(asteroid->position.x, asteroid->position.y);
@@ -226,6 +242,22 @@ static void transformAsteroid(Asteroid *asteroid) {
 		asteroid->transformedCollisionTriangles[i] = modelMatrix * asteroid->collisionTriangles[i];
 	}
 	asteroid->bounds = getPolygonBounds(asteroid->transformedPolygon, asteroid->vertexCount);
+}
+
+static void transformUfo(Ufo *ufo) {
+	mat4 translationMatrix = createTranslationMatrix(ufo->position.x, ufo->position.y);
+	mat4 scaleMatrix = createScaleMatrix(ufo->scale);
+	mat4 modelMatrix = translationMatrix * scaleMatrix;
+	for (int i = 0; i < arrayCount(ufo->outlineVertices); ++i) {
+		ufo->transformedOutlineVertices[i] = modelMatrix * ufo->outlineVertices[i];
+	}
+	for (int i = 0; i < arrayCount(ufo->innerLines); ++i) {
+		ufo->transformedInnerLines[i] = modelMatrix * ufo->innerLines[i];
+	}
+	for (int i = 0; i < ufo->collisionVertexCount; ++i) {
+		ufo->transformedCollisionTriangles[i] = modelMatrix * ufo->collisionTriangles[i];
+	}
+	ufo->bounds = getPolygonBounds(ufo->transformedOutlineVertices, arrayCount(ufo->outlineVertices));
 }
 
 static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, float scale) {
@@ -435,6 +467,30 @@ bool initGame() {
 	triangulatePolygon(asteroidVertices2, arrayCount(asteroidVertices2), asteroidCollisionTriangles2, &asteroidCollisionVertexCount2);
 	triangulatePolygon(asteroidVertices3, arrayCount(asteroidVertices3), asteroidCollisionTriangles3, &asteroidCollisionVertexCount3);
 	triangulatePolygon(asteroidVertices4, arrayCount(asteroidVertices4), asteroidCollisionTriangles4, &asteroidCollisionVertexCount4);
+
+	g_ufo.outlineVertices[0] = Vec2(-0.3f, 0.4f);
+	g_ufo.outlineVertices[1] = Vec2(-0.4f, 0.1f);
+	g_ufo.outlineVertices[2] = Vec2(-0.9f, -0.1f);
+	g_ufo.outlineVertices[3] = Vec2(-0.6f, -0.4f);
+	g_ufo.outlineVertices[4] = Vec2(0.6f, -0.4f);
+	g_ufo.outlineVertices[5] = Vec2(0.9f, -0.1f);
+	g_ufo.outlineVertices[6] = Vec2(0.4f, 0.1f);
+	g_ufo.outlineVertices[7] = Vec2(0.3f, 0.4f);
+
+	g_ufo.innerLines[0] = Vec2(-0.4f, 0.1f);
+	g_ufo.innerLines[1] = Vec2(0.4f, 0.1f);
+
+	g_ufo.innerLines[2] = Vec2(-0.9f, -0.1f);
+	g_ufo.innerLines[3] = Vec2(0.9f, -0.1f);
+
+	triangulatePolygon(g_ufo.outlineVertices, arrayCount(g_ufo.outlineVertices), g_ufo.collisionTriangles, &g_ufo.collisionVertexCount);
+
+	g_ufo.active = true;
+	g_ufo.position = Vec2(300, 300);
+	g_ufo.velocity = Vec2(-100, 0);
+	g_ufo.scale = 50;
+
+	transformUfo(&g_ufo);
 
 	startLevel();
 	return true;
@@ -766,6 +822,14 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 		glUniform4fv(g_colorUniform, 1, whiteColor);
 #endif
+	}
+
+	if (g_ufo.active) {
+		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_ufo.transformedOutlineVertices);
+		glDrawArrays(GL_LINE_LOOP, 0, arrayCount(g_ufo.transformedOutlineVertices));
+
+		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_ufo.transformedInnerLines);
+		glDrawArrays(GL_LINES, 0, arrayCount(g_ufo.transformedInnerLines));
 	}
 
 	if (!g_player.alive) {
