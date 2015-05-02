@@ -715,7 +715,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 		glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].polygon.vertexCount);
 #endif
 
-#if 0
+#if 1
 		// Draw asteroid's collision polygons.
 		glUniform4fv(g_colorUniform, 1, redColor);
 		for (int collisionPolIndex = 0;

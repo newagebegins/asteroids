@@ -95,7 +95,7 @@ inline int findEarTip(int vertexCount, int *vertexTypes, int *indices, float *ve
 }
 
 struct IntArray {
-	int e[500];
+	int e[100];
 	int size;
 };
 
@@ -112,32 +112,29 @@ inline void arrayAdd(IntArray *arr, int x) {
 	arr->size++;
 }
 
-inline void cutEarTip(int earTipIndex, int *indices, IntArray *triangles, int *vertexCount, IntArray *indicesArray, IntArray *vertexTypesArray) {
-	arrayAdd(triangles, indices[getPreviousIndex(earTipIndex, *vertexCount)]);
-	arrayAdd(triangles, indices[earTipIndex]);
-	arrayAdd(triangles, indices[getNextIndex(earTipIndex, *vertexCount)]);
-
-	arrayRemoveIndex(indicesArray, earTipIndex);
-	arrayRemoveIndex(vertexTypesArray, earTipIndex);
-	(*vertexCount)--;
-}
-
-inline void triangulate(int vertexCount, int *vertexTypes, int *indices, float *vertices, IntArray *triangles, IntArray *indicesArray, IntArray *vertexTypesArray) {
+inline void triangulate(int vertexCount, float *vertices, IntArray *triangles, IntArray *indices, IntArray *vertexTypes) {
 	while (vertexCount > 3) {
-		int earTipIndex = findEarTip(vertexCount, vertexTypes, indices, vertices);
-		cutEarTip(earTipIndex, indices, triangles, &vertexCount, indicesArray, vertexTypesArray);
+		int earTipIndex = findEarTip(vertexCount, vertexTypes->e, indices->e, vertices);
+
+		// Cut ear tip
+		arrayAdd(triangles, indices->e[getPreviousIndex(earTipIndex, vertexCount)]);
+		arrayAdd(triangles, indices->e[earTipIndex]);
+		arrayAdd(triangles, indices->e[getNextIndex(earTipIndex, vertexCount)]);
+		arrayRemoveIndex(indices, earTipIndex);
+		arrayRemoveIndex(vertexTypes, earTipIndex);
+		vertexCount--;
 
 		// The type of the two vertices adjacent to the clipped vertex may have changed.
 		int previousIndex = getPreviousIndex(earTipIndex, vertexCount);
 		int nextIndex = earTipIndex == vertexCount ? 0 : earTipIndex;
-		vertexTypes[previousIndex] = classifyVertex(previousIndex, indices, vertices, vertexCount);
-		vertexTypes[nextIndex] = classifyVertex(nextIndex, indices, vertices, vertexCount);
+		vertexTypes->e[previousIndex] = classifyVertex(previousIndex, indices->e, vertices, vertexCount);
+		vertexTypes->e[nextIndex] = classifyVertex(nextIndex, indices->e, vertices, vertexCount);
 	}
 
 	if (vertexCount == 3) {
-		arrayAdd(triangles, indices[0]);
-		arrayAdd(triangles, indices[1]);
-		arrayAdd(triangles, indices[2]);
+		arrayAdd(triangles, indices->e[0]);
+		arrayAdd(triangles, indices->e[1]);
+		arrayAdd(triangles, indices->e[2]);
 	}
 }
 
@@ -164,7 +161,7 @@ TriangulatePolygonResult triangulatePolygon(MyPolygon *polygon) {
 	}
 
 	IntArray triangles = {};
-	triangulate(vertexCount, vertexTypesArray.e, indices, vertices, &triangles, &indicesArray, &vertexTypesArray);
+	triangulate(vertexCount, vertices, &triangles, &indicesArray, &vertexTypesArray);
 
 	result.trianglesCount = triangles.size / 3;
 	for (int i = 0, j = 0; i < triangles.size - 2; i += 3, ++j) {
