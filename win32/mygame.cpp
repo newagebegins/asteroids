@@ -648,39 +648,52 @@ void gameUpdateAndRender(float dt, float *touches) {
 	if (g_ufo.active) {
 		g_ufo.position += g_ufo.velocity * dt;
 
-		g_ufo.changeDirectionTimer += dt;
-		if (g_ufo.changeDirectionTimer > g_ufo.changeDirectionDuration) {
-			float speed = len(g_ufo.velocity);
-			g_ufo.velocity = normalize(g_ufo.velocity);
-			if (g_ufo.velocity.y == 0.0f) {
-				g_ufo.velocity.y = randomInt(1) ? 1 : -1;
-			}
-			else {
-				g_ufo.velocity.y = 0;
-			}
-			g_ufo.velocity = normalize(g_ufo.velocity) * speed;
-			g_ufo.changeDirectionTimer = 0;
-			g_ufo.changeDirectionDuration = randomFloat(5, 20) / 10.0f;
+		if (g_ufo.bounds.max.x < 0 || g_ufo.bounds.min.x > SCREEN_WIDTH) {
+			g_ufo.active = false;
 		}
+		else {
+			// Wrap around the screen only vertically.
+			if (g_ufo.bounds.min.y > SCREEN_HEIGHT) {
+				g_ufo.position.y = -(g_ufo.bounds.max.y - g_ufo.position.y);
+			}
+			else if (g_ufo.bounds.max.y < 0) {
+				g_ufo.position.y = SCREEN_HEIGHT + (g_ufo.position.y - g_ufo.bounds.min.y);
+			}
 
-		g_ufo.nextShotTimer += dt;
-		if (g_ufo.nextShotTimer > g_ufo.nextShotDuration) {
-			for (int i = 0; i < arrayCount(g_bullets); i++) {
-				Bullet *bullet = &g_bullets[i];
-				if (!bullet->active) {
-					bullet->active = true;
-					bullet->player = false;
-					bullet->position = g_ufo.position;
-					bullet->velocity = randomDirection() * BULLET_SPEED;
-					bullet->distance = 0;
-					break;
+			g_ufo.changeDirectionTimer += dt;
+			if (g_ufo.changeDirectionTimer > g_ufo.changeDirectionDuration) {
+				float speed = len(g_ufo.velocity);
+				g_ufo.velocity = normalize(g_ufo.velocity);
+				if (g_ufo.velocity.y == 0.0f) {
+					g_ufo.velocity.y = randomInt(1) ? 1 : -1;
 				}
+				else {
+					g_ufo.velocity.y = 0;
+				}
+				g_ufo.velocity = normalize(g_ufo.velocity) * speed;
+				g_ufo.changeDirectionTimer = 0;
+				g_ufo.changeDirectionDuration = randomFloat(5, 20) / 10.0f;
 			}
-			g_ufo.nextShotTimer = 0;
-			g_ufo.nextShotDuration = randomFloat(5, 20) / 10.0f;
-		}
 
-		transformUfo(&g_ufo);
+			g_ufo.nextShotTimer += dt;
+			if (g_ufo.nextShotTimer > g_ufo.nextShotDuration) {
+				for (int i = 0; i < arrayCount(g_bullets); i++) {
+					Bullet *bullet = &g_bullets[i];
+					if (!bullet->active) {
+						bullet->active = true;
+						bullet->player = false;
+						bullet->position = g_ufo.position;
+						bullet->velocity = randomDirection() * BULLET_SPEED;
+						bullet->distance = 0;
+						break;
+					}
+				}
+				g_ufo.nextShotTimer = 0;
+				g_ufo.nextShotDuration = randomFloat(5, 20) / 10.0f;
+			}
+
+			transformUfo(&g_ufo);
+		}
 	}
 
 	mat4 playerTranslationMatrix = {};
