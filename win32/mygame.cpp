@@ -103,7 +103,7 @@ struct Asteroid {
 	vec2 *polygon;
 	int polygonVertexCount;
 	vec2 transformedPolygon[64];
-	vec2 collisionPolygons[128];
+	vec2 *collisionPolygons;
 	vec2 transformedCollisionPolygons[128];
 	int collisionPolygonsCount;
 	MyRectangle bounds;
@@ -123,7 +123,7 @@ vec2 asteroidVertices1[] = {
 	Vec2(0.9f, 0.4f),
 	Vec2(0.2f, 0.8f),
 };
-vec2 asteroidCollisionVertices1[128];
+vec2 asteroidCollisionTriangles1[128];
 int asteroidCollisionVertexCount1;
 
 vec2 asteroidVertices2[] = {
@@ -140,7 +140,7 @@ vec2 asteroidVertices2[] = {
 	Vec2(0.4f, 0.7f),
 	Vec2(0.0f, 0.6f),
 };
-vec2 asteroidCollisionVertices2[128];
+vec2 asteroidCollisionTriangles2[128];
 int asteroidCollisionVertexCount2;
 
 vec2 asteroidVertices3[] = {
@@ -155,7 +155,7 @@ vec2 asteroidVertices3[] = {
 	Vec2(0.4f, 0.6f),
 	Vec2(0.1f, 0.4f),
 };
-vec2 asteroidCollisionVertices3[128];
+vec2 asteroidCollisionTriangles3[128];
 int asteroidCollisionVertexCount3;
 
 vec2 asteroidVertices4[] = {
@@ -171,7 +171,7 @@ vec2 asteroidVertices4[] = {
 	Vec2(0.6f, 0.2f),
 	Vec2(0.2f, 0.5f),
 };
-vec2 asteroidCollisionVertices4[128];
+vec2 asteroidCollisionTriangles4[128];
 int asteroidCollisionVertexCount4;
 
 struct ShipFragment {
@@ -240,25 +240,32 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 	case 1:
 		asteroid->polygon = asteroidVertices1;
 		asteroid->polygonVertexCount = arrayCount(asteroidVertices1);
+		asteroid->collisionPolygons = asteroidCollisionTriangles1;
+		asteroid->collisionPolygonsCount = asteroidCollisionVertexCount1;
 		break;
 
 	case 2:
 		asteroid->polygon = asteroidVertices2;
 		asteroid->polygonVertexCount = arrayCount(asteroidVertices2);
+		asteroid->collisionPolygons = asteroidCollisionTriangles2;
+		asteroid->collisionPolygonsCount = asteroidCollisionVertexCount2;
 		break;
 
 	case 3:
 		asteroid->polygon = asteroidVertices3;
 		asteroid->polygonVertexCount = arrayCount(asteroidVertices3);
+		asteroid->collisionPolygons = asteroidCollisionTriangles3;
+		asteroid->collisionPolygonsCount = asteroidCollisionVertexCount3;
 		break;
 
 	case 4:
 		asteroid->polygon = asteroidVertices4;
 		asteroid->polygonVertexCount = arrayCount(asteroidVertices4);
+		asteroid->collisionPolygons = asteroidCollisionTriangles4;
+		asteroid->collisionPolygonsCount = asteroidCollisionVertexCount4;
 		break;
 	}
 
-	triangulatePolygon(asteroid->polygon, asteroid->polygonVertexCount, asteroid->collisionPolygons, &asteroid->collisionPolygonsCount);
 	transformAsteroid(asteroid);
 }
 
@@ -424,6 +431,11 @@ bool initGame() {
 	g_input.fireButton.dimensions = g_input.leftButton.dimensions;
 	g_input.forwardButton.position = Vec2(g_input.fireButton.position.x - g_input.fireButton.dimensions.x, 0);
 	g_input.forwardButton.dimensions = g_input.leftButton.dimensions;
+
+	triangulatePolygon(asteroidVertices1, arrayCount(asteroidVertices1), asteroidCollisionTriangles1, &asteroidCollisionVertexCount1);
+	triangulatePolygon(asteroidVertices2, arrayCount(asteroidVertices2), asteroidCollisionTriangles2, &asteroidCollisionVertexCount2);
+	triangulatePolygon(asteroidVertices3, arrayCount(asteroidVertices3), asteroidCollisionTriangles3, &asteroidCollisionVertexCount3);
+	triangulatePolygon(asteroidVertices4, arrayCount(asteroidVertices4), asteroidCollisionTriangles4, &asteroidCollisionVertexCount4);
 
 	startLevel();
 	return true;
