@@ -156,14 +156,14 @@ void triangulatePolygon(vec2 *vertices, int vertexCount, vec2 *outTriangles, int
 		vertexTypes[i] = classifyVertex(i, indices, (float *)vertices, vertexCount);
 	}
 
-	IntArray triangles = {};
-	triangulate(vertexCount, (float *)vertices, &triangles, &indicesArray, &vertexTypesArray);
+	IntArray triangleIndices = {};
+	triangulate(vertexCount, (float *)vertices, &triangleIndices, &indicesArray, &vertexTypesArray);
 
-	*outVertexCount = triangles.size;
-	for (int i = 0; i < triangles.size - 2; i += 3) {
+	*outVertexCount = triangleIndices.size;
+	for (int i = 0; i < triangleIndices.size - 2; i += 3) {
 		// Changing order back to counter-clockwise.
-		outTriangles[i + 0] = vertices[triangles.e[i + 2]];
-		outTriangles[i + 1] = vertices[triangles.e[i + 1]];
-		outTriangles[i + 2] = vertices[triangles.e[i + 0]];
+		outTriangles[i + 0] = vertices[triangleIndices.e[i + 2]];
+		outTriangles[i + 1] = vertices[triangleIndices.e[i + 1]];
+		outTriangles[i + 2] = vertices[triangleIndices.e[i + 0]];
 	}
 }
