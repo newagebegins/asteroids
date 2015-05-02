@@ -1,9 +1,7 @@
 #ifndef MYGAME_H
 #define MYGAME_H
 
-struct vec2 {
-	float x, y;
-};
+#include "mygame_math.h"
 
 struct Button {
 	bool isDown;

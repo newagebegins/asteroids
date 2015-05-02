@@ -74,12 +74,15 @@
   <ItemGroup>
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="mygame.cpp" />
+    <ClCompile Include="mygame_triangulator.cpp" />
     <ClCompile Include="mygame_win32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gl3w.h" />
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="mygame.h" />
+    <ClInclude Include="mygame_math.h" />
+    <ClInclude Include="mygame_triangulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

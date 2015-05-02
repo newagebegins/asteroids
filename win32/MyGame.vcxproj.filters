@@ -24,6 +24,9 @@
     <ClCompile Include="gl3w.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mygame_triangulator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gl3w.h">
@@ -33,6 +36,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mygame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mygame_triangulator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mygame_math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
