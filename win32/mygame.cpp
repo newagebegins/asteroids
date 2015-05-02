@@ -258,14 +258,7 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 		break;
 	}
 
-	TriangulatePolygonResult triangulateResult = triangulatePolygon(asteroid->polygon, asteroid->polygonVertexCount);
-	asteroid->collisionPolygonsCount = triangulateResult.vertexCount / 3;
-	for (int i = 0; i < asteroid->collisionPolygonsCount; ++i) {
-		asteroid->collisionPolygons[i * 3 + 0] = triangulateResult.triangles[i * 3 + 0];
-		asteroid->collisionPolygons[i * 3 + 1] = triangulateResult.triangles[i * 3 + 1];
-		asteroid->collisionPolygons[i * 3 + 2] = triangulateResult.triangles[i * 3 + 2];
-	}
-
+	triangulatePolygon(asteroid->polygon, asteroid->polygonVertexCount, asteroid->collisionPolygons, &asteroid->collisionPolygonsCount);
 	transformAsteroid(asteroid);
 }
 

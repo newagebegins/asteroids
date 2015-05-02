@@ -138,10 +138,8 @@ inline void triangulate(int vertexCount, float *vertices, IntArray *triangles, I
 	}
 }
 
-TriangulatePolygonResult triangulatePolygon(vec2 *vertices, int vertexCount) {
+void triangulatePolygon(vec2 *vertices, int vertexCount, vec2 *outTriangles, int *outVertexCount) {
 	// Polygon vertices should be in counter-clockwise order.
-
-	TriangulatePolygonResult result = {};
 
 	IntArray indicesArray = {};
 	indicesArray.size = vertexCount;
@@ -161,13 +159,11 @@ TriangulatePolygonResult triangulatePolygon(vec2 *vertices, int vertexCount) {
 	IntArray triangles = {};
 	triangulate(vertexCount, (float *)vertices, &triangles, &indicesArray, &vertexTypesArray);
 
-	result.vertexCount = triangles.size;
+	*outVertexCount = triangles.size;
 	for (int i = 0; i < triangles.size - 2; i += 3) {
 		// Changing order back to counter-clockwise.
-		result.triangles[i + 0] = vertices[triangles.e[i + 2]];
-		result.triangles[i + 1] = vertices[triangles.e[i + 1]];
-		result.triangles[i + 2] = vertices[triangles.e[i + 0]];
+		outTriangles[i + 0] = vertices[triangles.e[i + 2]];
+		outTriangles[i + 1] = vertices[triangles.e[i + 1]];
+		outTriangles[i + 2] = vertices[triangles.e[i + 0]];
 	}
-
-	return result;
 }
