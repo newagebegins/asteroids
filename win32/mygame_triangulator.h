@@ -5,9 +5,9 @@
 #include "mygame_polygon.h"
 
 struct TriangulatePolygonResult {
-	MyPolygon triangles[100];
-	int trianglesCount;
+	vec2 triangles[300];
+	int vertexCount;
 };
-TriangulatePolygonResult triangulatePolygon(MyPolygon *polygon);
+TriangulatePolygonResult triangulatePolygon(vec2 *vertices, int vertexCount);
 
 #endif
