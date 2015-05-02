@@ -82,6 +82,7 @@
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="mygame.h" />
     <ClInclude Include="mygame_math.h" />
+    <ClInclude Include="mygame_random.h" />
     <ClInclude Include="mygame_triangulator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

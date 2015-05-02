@@ -5,16 +5,6 @@
 #define TANGENTIAL 0
 #define CONVEX 1
 
-int signum(float x) {
-	if (x > 0) {
-		return 1;
-	}
-	if (x < 0) {
-		return -1;
-	}
-	return 0;
-}
-
 inline int getPreviousIndex(int index, int vertexCount) {
 	int result = (index == 0 ? vertexCount : index) - 1;
 	return result;

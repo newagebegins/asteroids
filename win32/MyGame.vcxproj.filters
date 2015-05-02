@@ -44,5 +44,8 @@
     <ClInclude Include="mygame_math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mygame_random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

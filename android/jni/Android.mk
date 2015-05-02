@@ -18,7 +18,9 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := libmygame
 LOCAL_CFLAGS    := -Werror
-LOCAL_SRC_FILES := mygame_android.cpp ../../win32/mygame.cpp
+LOCAL_SRC_FILES := mygame_android.cpp \
+	../../win32/mygame.cpp \
+	../../win32/mygame_triangulator.cpp
 LOCAL_LDLIBS    := -llog -lGLESv2
 
 include $(BUILD_SHARED_LIBRARY)
