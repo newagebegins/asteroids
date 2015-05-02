@@ -222,9 +222,7 @@ static void transformAsteroid(Asteroid *asteroid) {
 		asteroid->transformedPolygon[i] = modelMatrix * asteroid->vertices[i];
 	}
 	for (int i = 0; i < asteroid->collisionVertexCount; ++i) {
-		for (int j = 0; j < 3; ++j) {
-			asteroid->transformedCollisionTriangles[i*3 + j] = modelMatrix * asteroid->collisionTriangles[i*3 + j];
-		}
+		asteroid->transformedCollisionTriangles[i] = modelMatrix * asteroid->collisionTriangles[i];
 	}
 	asteroid->bounds = getPolygonBounds(asteroid->transformedPolygon, asteroid->vertexCount);
 }
@@ -601,7 +599,8 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (!g_asteroids[i].active) {
 				continue;
 			}
-			for (int j = 0; j < g_asteroids[i].collisionVertexCount && !collision; ++j) {
+			int trianglesCount = g_asteroids[i].collisionVertexCount/3;
+			for (int j = 0; j < trianglesCount && !collision; ++j) {
 				vec2 triangle[3];
 				triangle[0] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 0];
 				triangle[1] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 1];
@@ -755,14 +754,12 @@ void gameUpdateAndRender(float dt, float *touches) {
 #if 1
 		// Draw asteroid's collision polygons.
 		glUniform4fv(g_colorUniform, 1, redColor);
-		for (int collisionPolIndex = 0;
-			collisionPolIndex < g_asteroids[i].collisionVertexCount;
-			++collisionPolIndex)
-		{
+		int triangleCount = g_asteroids[i].collisionVertexCount / 3;
+		for (int j = 0;	j < triangleCount; ++j) {
 			vec2 triangle[3];
-			triangle[0] = g_asteroids[i].transformedCollisionTriangles[collisionPolIndex * 3 + 0];
-			triangle[1] = g_asteroids[i].transformedCollisionTriangles[collisionPolIndex * 3 + 1];
-			triangle[2] = g_asteroids[i].transformedCollisionTriangles[collisionPolIndex * 3 + 2];
+			triangle[0] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 0];
+			triangle[1] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 1];
+			triangle[2] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 2];
 			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, triangle);
 			glDrawArrays(GL_LINE_LOOP, 0, 3);
 		}
