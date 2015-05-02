@@ -78,8 +78,8 @@ struct Player {
 	float reviveTimer;
 	float flameFlickTimer;
 	bool flameVisible;
-	MyPolygon collisionPolygon;
-	MyPolygon transformedCollisionPolygon;
+	vec2 collisionPolygon[3];
+	vec2 transformedCollisionPolygon[3];
 };
 inline void initPlayer(Player *player) {
 	player->alive = true;
@@ -90,11 +90,9 @@ inline void initPlayer(Player *player) {
 	player->flameFlickTimer = 0.0f;
 	player->flameVisible = false;
 
-	player->collisionPolygon.vertexCount = 3;
-	player->collisionPolygon.vertices[0] = Vec2(0.0f, 0.9f);
-	player->collisionPolygon.vertices[1] = Vec2(-0.54f, -0.49f);
-	player->collisionPolygon.vertices[2] = Vec2(0.54f, -0.49f);
-	player->transformedCollisionPolygon.vertexCount = player->collisionPolygon.vertexCount;
+	player->collisionPolygon[0] = Vec2(0.0f, 0.9f);
+	player->collisionPolygon[1] = Vec2(-0.54f, -0.49f);
+	player->collisionPolygon[2] = Vec2(0.54f, -0.49f);
 }
 
 struct Asteroid {
@@ -162,7 +160,7 @@ static void transformAsteroid(Asteroid *asteroid) {
 			asteroid->transformedCollisionPolygons[i].vertices[j] = modelMatrix * asteroid->collisionPolygons[i].vertices[j];
 		}
 	}
-	asteroid->bounds = getPolygonBounds(&asteroid->transformedPolygon);
+	asteroid->bounds = getPolygonBounds(asteroid->transformedPolygon.vertices, asteroid->transformedPolygon.vertexCount);
 }
 
 static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, float scale) {
@@ -565,8 +563,8 @@ void gameUpdateAndRender(float dt, float *touches) {
 		playerRotationMatrix = createRotationMatrix(PI / 2.0f - g_player.angle);
 		playerModelMatrix = playerTranslationMatrix * playerRotationMatrix * playerScaleMatrix;
 
-		for (int j = 0; j < g_player.collisionPolygon.vertexCount; ++j) {
-			g_player.transformedCollisionPolygon.vertices[j] = playerModelMatrix * g_player.collisionPolygon.vertices[j];
+		for (int j = 0; j < arrayCount(g_player.collisionPolygon); ++j) {
+			g_player.transformedCollisionPolygon[j] = playerModelMatrix * g_player.collisionPolygon[j];
 		}
 
 		bool collision = false;
@@ -575,7 +573,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 				continue;
 			}
 			for (int j = 0; j < g_asteroids[i].collisionPolygonsCount && !collision; ++j) {
-				if (polygonsIntersect(&g_player.transformedCollisionPolygon, &g_asteroids[i].transformedCollisionPolygons[j])) {
+				if (polygonsIntersect(g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon), g_asteroids[i].transformedCollisionPolygons[j].vertices, g_asteroids[i].transformedCollisionPolygons[j].vertexCount)) {
 					destroyAsteroid(&g_asteroids[i]);
 					g_player.alive = false;
 					g_player.reviveTimer = 0;
@@ -635,7 +633,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (!asteroid->active) {
 				continue;
 			}
-			if (isPointInPolygon(g_bullets[i].position, &asteroid->transformedPolygon)) {
+			if (isPointInPolygon(g_bullets[i].position, asteroid->transformedPolygon.vertices, asteroid->transformedPolygon.vertexCount)) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
 				break;

@@ -1,20 +1,20 @@
 #include "mygame_polygon.h"
 
-static vec2 getEdge(int edgeIndex, MyPolygon *polygon) {
+static inline vec2 getEdge(int edgeIndex, vec2 *vertices, int vertexCount) {
 	vec2 result;
-	vec2 p1 = polygon->vertices[edgeIndex];
+	vec2 p1 = vertices[edgeIndex];
 	vec2 p2;
-	if (edgeIndex + 1 >= polygon->vertexCount) {
-		p2 = polygon->vertices[0];
+	if (edgeIndex + 1 >= vertexCount) {
+		p2 = vertices[0];
 	}
 	else {
-		p2 = polygon->vertices[edgeIndex + 1];
+		p2 = vertices[edgeIndex + 1];
 	}
 	result = p2 - p1;
 	return result;
 }
 
-static float intervalDistance(float minA, float maxA, float minB, float maxB) {
+static inline float intervalDistance(float minA, float maxA, float minB, float maxB) {
 	float result;
 	if (minA < minB) {
 		result = minB - maxA;
@@ -28,13 +28,13 @@ static float intervalDistance(float minA, float maxA, float minB, float maxB) {
 struct ProjectPolygonResult {
 	float min, max;
 };
-static ProjectPolygonResult projectPolygon(vec2 axis, MyPolygon *polygon) {
+static ProjectPolygonResult projectPolygon(vec2 axis, vec2 *vertices, int vertexCount) {
 	ProjectPolygonResult result;
-	float dotProduct = dot(axis, polygon->vertices[0]);
+	float dotProduct = dot(axis, vertices[0]);
 	result.min = dotProduct;
 	result.max = dotProduct;
-	for (int i = 1; i < polygon->vertexCount; ++i) {
-		dotProduct = dot(axis, polygon->vertices[i]);
+	for (int i = 1; i < vertexCount; ++i) {
+		dotProduct = dot(axis, vertices[i]);
 		if (dotProduct < result.min) {
 			result.min = dotProduct;
 		}
@@ -45,18 +45,18 @@ static ProjectPolygonResult projectPolygon(vec2 axis, MyPolygon *polygon) {
 	return result;
 }
 
-bool polygonsIntersect(MyPolygon *polygonA, MyPolygon *polygonB) {
-	for (int edgeIndex = 0; edgeIndex < polygonA->vertexCount + polygonB->vertexCount; ++edgeIndex) {
+bool polygonsIntersect(vec2 *verticesA, int vertexCountA, vec2 *verticesB, int vertexCountB) {
+	for (int edgeIndex = 0; edgeIndex < vertexCountA + vertexCountB; ++edgeIndex) {
 		vec2 edge;
-		if (edgeIndex < polygonA->vertexCount) {
-			edge = getEdge(edgeIndex, polygonA);
+		if (edgeIndex < vertexCountA) {
+			edge = getEdge(edgeIndex, verticesA, vertexCountA);
 		}
 		else {
-			edge = getEdge(edgeIndex - polygonA->vertexCount, polygonB);
+			edge = getEdge(edgeIndex - vertexCountA, verticesB, vertexCountB);
 		}
 		vec2 axis = normalize(Vec2(-edge.y, edge.x));
-		ProjectPolygonResult projectionA = projectPolygon(axis, polygonA);
-		ProjectPolygonResult projectionB = projectPolygon(axis, polygonB);
+		ProjectPolygonResult projectionA = projectPolygon(axis, verticesA, vertexCountA);
+		ProjectPolygonResult projectionB = projectPolygon(axis, verticesB, vertexCountB);
 		float distance = intervalDistance(projectionA.min, projectionA.max,
 			projectionB.min, projectionB.max);
 		if (distance > 0) {
@@ -66,14 +66,14 @@ bool polygonsIntersect(MyPolygon *polygonA, MyPolygon *polygonB) {
 	return true;
 }
 
-MyRectangle getPolygonBounds(MyPolygon *polygon) {
+MyRectangle getPolygonBounds(vec2 *vertices, int vertexCount) {
 	MyRectangle result;
-	result.min.x = polygon->vertices[0].x;
-	result.max.x = polygon->vertices[0].x;
-	result.min.y = polygon->vertices[0].y;
-	result.max.y = polygon->vertices[0].y;
-	for (int i = 1; i < polygon->vertexCount; i++) {
-		vec2 q = polygon->vertices[i];
+	result.min.x = vertices[0].x;
+	result.max.x = vertices[0].x;
+	result.min.y = vertices[0].y;
+	result.max.y = vertices[0].y;
+	for (int i = 1; i < vertexCount; i++) {
+		vec2 q = vertices[i];
 		result.min.x = fminf(q.x, result.min.x);
 		result.max.x = fmaxf(q.x, result.max.x);
 		result.min.y = fminf(q.y, result.min.y);
@@ -82,16 +82,16 @@ MyRectangle getPolygonBounds(MyPolygon *polygon) {
 	return result;
 }
 
-bool isPointInPolygon(vec2 p, MyPolygon *polygon) {
-	MyRectangle bounds = getPolygonBounds(polygon);
+bool isPointInPolygon(vec2 p, vec2 *vertices, int vertexCount) {
+	MyRectangle bounds = getPolygonBounds(vertices, vertexCount);
 	if (p.x < bounds.min.x || p.x > bounds.max.x || p.y < bounds.min.y || p.y > bounds.max.y) {
 		return false;
 	}
 	// http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
 	bool inside = false;
-	for (int i = 0, j = polygon->vertexCount - 1; i < polygon->vertexCount; j = i++) {
-		if ((polygon->vertices[i].y > p.y) != (polygon->vertices[j].y > p.y) &&
-			p.x < (polygon->vertices[j].x - polygon->vertices[i].x) * (p.y - polygon->vertices[i].y) / (polygon->vertices[j].y - polygon->vertices[i].y) + polygon->vertices[i].x) {
+	for (int i = 0, j = vertexCount - 1; i < vertexCount; j = i++) {
+		if ((vertices[i].y > p.y) != (vertices[j].y > p.y) &&
+			p.x < (vertices[j].x - vertices[i].x) * (p.y - vertices[i].y) / (vertices[j].y - vertices[i].y) + vertices[i].x) {
 			inside = !inside;
 		}
 	}

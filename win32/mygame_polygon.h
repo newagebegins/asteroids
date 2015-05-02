@@ -8,8 +8,8 @@ struct MyPolygon {
 	int vertexCount;
 };
 
-MyRectangle getPolygonBounds(MyPolygon *polygon);
-bool polygonsIntersect(MyPolygon *polygonA, MyPolygon *polygonB);
-bool isPointInPolygon(vec2 p, MyPolygon *polygon);
+MyRectangle getPolygonBounds(vec2 *polygon, int vertexCount);
+bool polygonsIntersect(vec2 *verticesA, int vertexCountA, vec2 *verticesB, int vertexCountB);
+bool isPointInPolygon(vec2 p, vec2 *vertices, int vertexCount);
 
 #endif
