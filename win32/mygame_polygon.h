@@ -4,7 +4,6 @@
 #include "mygame_math.h"
 
 struct MyPolygon {
-	vec2 untransformedVertices[64];
 	vec2 vertices[64];
 	int vertexCount;
 };

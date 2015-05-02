@@ -79,6 +79,7 @@ struct Player {
 	float flameFlickTimer;
 	bool flameVisible;
 	MyPolygon collisionPolygon;
+	MyPolygon transformedCollisionPolygon;
 };
 inline void initPlayer(Player *player) {
 	player->alive = true;
@@ -90,9 +91,10 @@ inline void initPlayer(Player *player) {
 	player->flameVisible = false;
 
 	player->collisionPolygon.vertexCount = 3;
-	player->collisionPolygon.untransformedVertices[0] = Vec2(0.0f, 0.9f);
-	player->collisionPolygon.untransformedVertices[1] = Vec2(-0.54f, -0.49f);
-	player->collisionPolygon.untransformedVertices[2] = Vec2(0.54f, -0.49f);
+	player->collisionPolygon.vertices[0] = Vec2(0.0f, 0.9f);
+	player->collisionPolygon.vertices[1] = Vec2(-0.54f, -0.49f);
+	player->collisionPolygon.vertices[2] = Vec2(0.54f, -0.49f);
+	player->transformedCollisionPolygon.vertexCount = player->collisionPolygon.vertexCount;
 }
 
 struct Asteroid {
@@ -101,7 +103,9 @@ struct Asteroid {
 	vec2 velocity;
 	float scale;
 	MyPolygon polygon;
+	MyPolygon transformedPolygon;
 	MyPolygon collisionPolygons[60];
+	MyPolygon transformedCollisionPolygons[60];
 	int collisionPolygonsCount;
 	MyRectangle bounds;
 };
@@ -151,14 +155,14 @@ static void transformAsteroid(Asteroid *asteroid) {
 	mat4 scaleMatrix = createScaleMatrix(asteroid->scale);
 	mat4 modelMatrix = translationMatrix * scaleMatrix;
 	for (int i = 0; i < asteroid->polygon.vertexCount; ++i) {
-		asteroid->polygon.vertices[i] = modelMatrix * asteroid->polygon.untransformedVertices[i];
+		asteroid->transformedPolygon.vertices[i] = modelMatrix * asteroid->polygon.vertices[i];
 	}
 	for (int i = 0; i < asteroid->collisionPolygonsCount; ++i) {
 		for (int j = 0; j < asteroid->collisionPolygons[i].vertexCount; ++j) {
-			asteroid->collisionPolygons[i].vertices[j] = modelMatrix * asteroid->collisionPolygons[i].untransformedVertices[j];
+			asteroid->transformedCollisionPolygons[i].vertices[j] = modelMatrix * asteroid->collisionPolygons[i].vertices[j];
 		}
 	}
-	asteroid->bounds = getPolygonBounds(&asteroid->polygon);
+	asteroid->bounds = getPolygonBounds(&asteroid->transformedPolygon);
 }
 
 static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, float scale) {
@@ -171,69 +175,72 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 	switch (type) {
 	case 1:
 		asteroid->polygon.vertexCount = 12;
-		asteroid->polygon.untransformedVertices[0] = Vec2(-0.5f, 0.8f);
-		asteroid->polygon.untransformedVertices[1] = Vec2(-0.3f, 0.4f);
-		asteroid->polygon.untransformedVertices[2] = Vec2(-0.9f, 0.4f);
-		asteroid->polygon.untransformedVertices[3] = Vec2(-0.9f, -0.2f);
-		asteroid->polygon.untransformedVertices[4] = Vec2(-0.3f, -0.8f);
-		asteroid->polygon.untransformedVertices[5] = Vec2(0.2f, -0.7f);
-		asteroid->polygon.untransformedVertices[6] = Vec2(0.5f, -0.8f);
-		asteroid->polygon.untransformedVertices[7] = Vec2(0.9f, -0.3f);
-		asteroid->polygon.untransformedVertices[8] = Vec2(0.1f, 0.0f);
-		asteroid->polygon.untransformedVertices[9] = Vec2(0.9f, 0.2f);
-		asteroid->polygon.untransformedVertices[10] = Vec2(0.9f, 0.4f);
-		asteroid->polygon.untransformedVertices[11] = Vec2(0.2f, 0.8f);
+		asteroid->polygon.vertices[0] = Vec2(-0.5f, 0.8f);
+		asteroid->polygon.vertices[1] = Vec2(-0.3f, 0.4f);
+		asteroid->polygon.vertices[2] = Vec2(-0.9f, 0.4f);
+		asteroid->polygon.vertices[3] = Vec2(-0.9f, -0.2f);
+		asteroid->polygon.vertices[4] = Vec2(-0.3f, -0.8f);
+		asteroid->polygon.vertices[5] = Vec2(0.2f, -0.7f);
+		asteroid->polygon.vertices[6] = Vec2(0.5f, -0.8f);
+		asteroid->polygon.vertices[7] = Vec2(0.9f, -0.3f);
+		asteroid->polygon.vertices[8] = Vec2(0.1f, 0.0f);
+		asteroid->polygon.vertices[9] = Vec2(0.9f, 0.2f);
+		asteroid->polygon.vertices[10] = Vec2(0.9f, 0.4f);
+		asteroid->polygon.vertices[11] = Vec2(0.2f, 0.8f);
 		break;
 
 	case 2:
 		asteroid->polygon.vertexCount = 12;
-		asteroid->polygon.untransformedVertices[0] = Vec2(-0.4f, 0.7f);
-		asteroid->polygon.untransformedVertices[1] = Vec2(-0.7f, 0.4f);
-		asteroid->polygon.untransformedVertices[2] = Vec2(-0.6f, 0.0f);
-		asteroid->polygon.untransformedVertices[3] = Vec2(-0.7f, -0.3f);
-		asteroid->polygon.untransformedVertices[4] = Vec2(-0.5f, -0.6f);
-		asteroid->polygon.untransformedVertices[5] = Vec2(-0.2f, -0.5f);
-		asteroid->polygon.untransformedVertices[6] = Vec2(0.4f, -0.6f);
-		asteroid->polygon.untransformedVertices[7] = Vec2(0.8f, -0.1f);
-		asteroid->polygon.untransformedVertices[8] = Vec2(0.5f, 0.3f);
-		asteroid->polygon.untransformedVertices[9] = Vec2(0.7f, 0.5f);
-		asteroid->polygon.untransformedVertices[10] = Vec2(0.4f, 0.7f);
-		asteroid->polygon.untransformedVertices[11] = Vec2(0.0f, 0.6f);
+		asteroid->polygon.vertices[0] = Vec2(-0.4f, 0.7f);
+		asteroid->polygon.vertices[1] = Vec2(-0.7f, 0.4f);
+		asteroid->polygon.vertices[2] = Vec2(-0.6f, 0.0f);
+		asteroid->polygon.vertices[3] = Vec2(-0.7f, -0.3f);
+		asteroid->polygon.vertices[4] = Vec2(-0.5f, -0.6f);
+		asteroid->polygon.vertices[5] = Vec2(-0.2f, -0.5f);
+		asteroid->polygon.vertices[6] = Vec2(0.4f, -0.6f);
+		asteroid->polygon.vertices[7] = Vec2(0.8f, -0.1f);
+		asteroid->polygon.vertices[8] = Vec2(0.5f, 0.3f);
+		asteroid->polygon.vertices[9] = Vec2(0.7f, 0.5f);
+		asteroid->polygon.vertices[10] = Vec2(0.4f, 0.7f);
+		asteroid->polygon.vertices[11] = Vec2(0.0f, 0.6f);
 		break;
 
 	case 3:
 		asteroid->polygon.vertexCount = 10;
-		asteroid->polygon.untransformedVertices[0] = Vec2(-0.3f, 0.7f);
-		asteroid->polygon.untransformedVertices[1] = Vec2(-0.7f, 0.5f);
-		asteroid->polygon.untransformedVertices[2] = Vec2(-0.7f, -0.3f);
-		asteroid->polygon.untransformedVertices[3] = Vec2(-0.3f, -0.6f);
-		asteroid->polygon.untransformedVertices[4] = Vec2(0.3f, -0.6f);
-		asteroid->polygon.untransformedVertices[5] = Vec2(0.9f, -0.3f);
-		asteroid->polygon.untransformedVertices[6] = Vec2(0.6f, 0.1f);
-		asteroid->polygon.untransformedVertices[7] = Vec2(0.7f, 0.4f);
-		asteroid->polygon.untransformedVertices[8] = Vec2(0.4f, 0.6f);
-		asteroid->polygon.untransformedVertices[9] = Vec2(0.1f, 0.4f);
+		asteroid->polygon.vertices[0] = Vec2(-0.3f, 0.7f);
+		asteroid->polygon.vertices[1] = Vec2(-0.7f, 0.5f);
+		asteroid->polygon.vertices[2] = Vec2(-0.7f, -0.3f);
+		asteroid->polygon.vertices[3] = Vec2(-0.3f, -0.6f);
+		asteroid->polygon.vertices[4] = Vec2(0.3f, -0.6f);
+		asteroid->polygon.vertices[5] = Vec2(0.9f, -0.3f);
+		asteroid->polygon.vertices[6] = Vec2(0.6f, 0.1f);
+		asteroid->polygon.vertices[7] = Vec2(0.7f, 0.4f);
+		asteroid->polygon.vertices[8] = Vec2(0.4f, 0.6f);
+		asteroid->polygon.vertices[9] = Vec2(0.1f, 0.4f);
 		break;
 
 	case 4:
 		asteroid->polygon.vertexCount = 11;
-		asteroid->polygon.untransformedVertices[0] = Vec2(-0.3f, 0.5f);
-		asteroid->polygon.untransformedVertices[1] = Vec2(-0.6f, 0.2f);
-		asteroid->polygon.untransformedVertices[2] = Vec2(-0.3f, 0.0f);
-		asteroid->polygon.untransformedVertices[3] = Vec2(-0.7f, -0.2f);
-		asteroid->polygon.untransformedVertices[4] = Vec2(-0.3f, -0.6f);
-		asteroid->polygon.untransformedVertices[5] = Vec2(0.1f, -0.2f);
-		asteroid->polygon.untransformedVertices[6] = Vec2(0.1f, -0.6f);
-		asteroid->polygon.untransformedVertices[7] = Vec2(0.3f, -0.6f);
-		asteroid->polygon.untransformedVertices[8] = Vec2(0.6f, -0.2f);
-		asteroid->polygon.untransformedVertices[9] = Vec2(0.6f, 0.2f);
-		asteroid->polygon.untransformedVertices[10] = Vec2(0.2f, 0.5f);
+		asteroid->polygon.vertices[0] = Vec2(-0.3f, 0.5f);
+		asteroid->polygon.vertices[1] = Vec2(-0.6f, 0.2f);
+		asteroid->polygon.vertices[2] = Vec2(-0.3f, 0.0f);
+		asteroid->polygon.vertices[3] = Vec2(-0.7f, -0.2f);
+		asteroid->polygon.vertices[4] = Vec2(-0.3f, -0.6f);
+		asteroid->polygon.vertices[5] = Vec2(0.1f, -0.2f);
+		asteroid->polygon.vertices[6] = Vec2(0.1f, -0.6f);
+		asteroid->polygon.vertices[7] = Vec2(0.3f, -0.6f);
+		asteroid->polygon.vertices[8] = Vec2(0.6f, -0.2f);
+		asteroid->polygon.vertices[9] = Vec2(0.6f, 0.2f);
+		asteroid->polygon.vertices[10] = Vec2(0.2f, 0.5f);
 		break;
 	}
+
+	asteroid->transformedPolygon.vertexCount = asteroid->polygon.vertexCount;
 
 	TriangulatePolygonResult triangulateResult = triangulatePolygon(&asteroid->polygon);
 	for (int i = 0; i < triangulateResult.trianglesCount; ++i) {
 		asteroid->collisionPolygons[i] = triangulateResult.triangles[i];
+		asteroid->transformedCollisionPolygons[i].vertexCount = asteroid->collisionPolygons[i].vertexCount;
 	}
 	asteroid->collisionPolygonsCount = triangulateResult.trianglesCount;
 
@@ -348,8 +355,7 @@ void setViewport(float windowWidth, float windowHeight) {
 	g_viewportY = viewportY;
 	g_viewportWidth = viewportWidth;
 	g_viewportHeight = viewportHeight;
-	glViewport((GLint)viewportX, (GLint)viewportY,
-		(GLsizei)viewportWidth, (GLsizei)viewportHeight);
+	glViewport((GLint)viewportX, (GLint)viewportY, (GLsizei)viewportWidth, (GLsizei)viewportHeight);
 }
 
 bool initGame() {
@@ -560,7 +566,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 		playerModelMatrix = playerTranslationMatrix * playerRotationMatrix * playerScaleMatrix;
 
 		for (int j = 0; j < g_player.collisionPolygon.vertexCount; ++j) {
-			g_player.collisionPolygon.vertices[j] = playerModelMatrix * g_player.collisionPolygon.untransformedVertices[j];
+			g_player.transformedCollisionPolygon.vertices[j] = playerModelMatrix * g_player.collisionPolygon.vertices[j];
 		}
 
 		bool collision = false;
@@ -569,7 +575,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 				continue;
 			}
 			for (int j = 0; j < g_asteroids[i].collisionPolygonsCount && !collision; ++j) {
-				if (polygonsIntersect(&g_player.collisionPolygon, &g_asteroids[i].collisionPolygons[j])) {
+				if (polygonsIntersect(&g_player.transformedCollisionPolygon, &g_asteroids[i].transformedCollisionPolygons[j])) {
 					destroyAsteroid(&g_asteroids[i]);
 					g_player.alive = false;
 					g_player.reviveTimer = 0;
@@ -629,7 +635,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (!asteroid->active) {
 				continue;
 			}
-			if (isPointInPolygon(g_bullets[i].position, &asteroid->polygon)) {
+			if (isPointInPolygon(g_bullets[i].position, &asteroid->transformedPolygon)) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
 				break;
@@ -711,8 +717,8 @@ void gameUpdateAndRender(float dt, float *touches) {
 			continue;
 		}
 #if 1
-		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_asteroids[i].polygon.vertices);
-		glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].polygon.vertexCount);
+		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_asteroids[i].transformedPolygon.vertices);
+		glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].transformedPolygon.vertexCount);
 #endif
 
 #if 1
@@ -722,8 +728,8 @@ void gameUpdateAndRender(float dt, float *touches) {
 			collisionPolIndex < g_asteroids[i].collisionPolygonsCount;
 			++collisionPolIndex)
 		{
-			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_asteroids[i].collisionPolygons[collisionPolIndex].vertices);
-			glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].collisionPolygons[collisionPolIndex].vertexCount);
+			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_asteroids[i].transformedCollisionPolygons[collisionPolIndex].vertices);
+			glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].transformedCollisionPolygons[collisionPolIndex].vertexCount);
 		}
 		glUniform4fv(g_colorUniform, 1, whiteColor);
 #endif

@@ -143,7 +143,7 @@ TriangulatePolygonResult triangulatePolygon(MyPolygon *polygon) {
 
 	TriangulatePolygonResult result = {};
 
-	float *vertices = (float *)polygon->untransformedVertices;
+	float *vertices = (float *)polygon->vertices;
 	int vertexCount = polygon->vertexCount;
 	IntArray indicesArray = {};
 	indicesArray.size = vertexCount;
@@ -166,9 +166,9 @@ TriangulatePolygonResult triangulatePolygon(MyPolygon *polygon) {
 	result.trianglesCount = triangles.size / 3;
 	for (int i = 0, j = 0; i < triangles.size - 2; i += 3, ++j) {
 		result.triangles[j].vertexCount = 3;
-		result.triangles[j].untransformedVertices[2] = polygon->untransformedVertices[triangles.e[i]];
-		result.triangles[j].untransformedVertices[1] = polygon->untransformedVertices[triangles.e[i + 1]];
-		result.triangles[j].untransformedVertices[0] = polygon->untransformedVertices[triangles.e[i + 2]];
+		result.triangles[j].vertices[2] = polygon->vertices[triangles.e[i]];
+		result.triangles[j].vertices[1] = polygon->vertices[triangles.e[i + 1]];
+		result.triangles[j].vertices[0] = polygon->vertices[triangles.e[i + 2]];
 	}
 
 	return result;
