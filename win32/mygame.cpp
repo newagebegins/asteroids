@@ -210,6 +210,8 @@ struct Ufo {
 	vec2 transformedCollisionTriangles[64];
 	int collisionVertexCount;
 	MyRectangle bounds;
+	float changeDirectionTimer;
+	float changeDirectionDuration;
 };
 
 Input g_input;
@@ -221,7 +223,7 @@ static Asteroid g_asteroids[20];
 static ShipFragment g_shipFragments[5];
 static Bullet g_bullets[10];
 static float g_levelEndTimer;
-static int g_currentLevel = 10;
+static int g_currentLevel = 2;
 static float g_windowWidth;
 static float g_windowHeight;
 static float g_viewportX;
@@ -486,9 +488,10 @@ bool initGame() {
 	triangulatePolygon(g_ufo.outlineVertices, arrayCount(g_ufo.outlineVertices), g_ufo.collisionTriangles, &g_ufo.collisionVertexCount);
 
 	g_ufo.active = true;
-	g_ufo.position = Vec2(300, 300);
-	g_ufo.velocity = Vec2(-100, 0);
-	g_ufo.scale = 50;
+	g_ufo.position = Vec2(200.0f, 300.0f);
+	g_ufo.velocity = Vec2(100.0f, 0.0f);
+	g_ufo.scale = 40;
+	g_ufo.changeDirectionDuration = 2.0f;
 
 	transformUfo(&g_ufo);
 
@@ -635,6 +638,25 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 
 		transformAsteroid(&g_asteroids[i]);
+	}
+
+	if (g_ufo.active) {
+		g_ufo.position += g_ufo.velocity * dt;
+		g_ufo.changeDirectionTimer += dt;
+		if (g_ufo.changeDirectionTimer > g_ufo.changeDirectionDuration) {
+			float speed = len(g_ufo.velocity);
+			g_ufo.velocity = normalize(g_ufo.velocity);
+			if (g_ufo.velocity.y == 0.0f) {
+				g_ufo.velocity.y = randomInt(1) ? 1 : -1;
+			}
+			else {
+				g_ufo.velocity.y = 0;
+			}
+			g_ufo.velocity = normalize(g_ufo.velocity) * speed;
+			g_ufo.changeDirectionTimer = 0;
+			g_ufo.changeDirectionDuration = randomFloat(0.5f, 2.0f);
+		}
+		transformUfo(&g_ufo);
 	}
 
 	mat4 playerTranslationMatrix = {};
@@ -808,7 +830,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 		glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].vertexCount);
 #endif
 
-#if 1
+#if 0
 		// Draw asteroid's collision polygons.
 		glUniform4fv(g_colorUniform, 1, redColor);
 		int triangleCount = g_asteroids[i].collisionVertexCount / 3;
@@ -830,6 +852,21 @@ void gameUpdateAndRender(float dt, float *touches) {
 
 		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_ufo.transformedInnerLines);
 		glDrawArrays(GL_LINES, 0, arrayCount(g_ufo.transformedInnerLines));
+
+#if 0
+		// Draw ufo's collision polygons.
+		glUniform4fv(g_colorUniform, 1, redColor);
+		int triangleCount = g_ufo.collisionVertexCount / 3;
+		for (int j = 0; j < triangleCount; ++j) {
+			vec2 triangle[3];
+			triangle[0] = g_ufo.transformedCollisionTriangles[j * 3 + 0];
+			triangle[1] = g_ufo.transformedCollisionTriangles[j * 3 + 1];
+			triangle[2] = g_ufo.transformedCollisionTriangles[j * 3 + 2];
+			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, triangle);
+			glDrawArrays(GL_LINE_LOOP, 0, 3);
+		}
+		glUniform4fv(g_colorUniform, 1, whiteColor);
+#endif
 	}
 
 	if (!g_player.alive) {
