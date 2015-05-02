@@ -103,7 +103,6 @@ struct Asteroid {
 	vec2 polygon[64];
 	int polygonVertexCount;
 	vec2 transformedPolygon[64];
-	int transformedPolygonVertexCount;
 	vec2 collisionPolygons[128];
 	vec2 transformedCollisionPolygons[128];
 	int collisionPolygonsCount;
@@ -162,7 +161,7 @@ static void transformAsteroid(Asteroid *asteroid) {
 			asteroid->transformedCollisionPolygons[i*3 + j] = modelMatrix * asteroid->collisionPolygons[i*3 + j];
 		}
 	}
-	asteroid->bounds = getPolygonBounds(asteroid->transformedPolygon, asteroid->transformedPolygonVertexCount);
+	asteroid->bounds = getPolygonBounds(asteroid->transformedPolygon, asteroid->polygonVertexCount);
 }
 
 static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, float scale) {
@@ -234,8 +233,6 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 		asteroid->polygon[10] = Vec2(0.2f, 0.5f);
 		break;
 	}
-
-	asteroid->transformedPolygonVertexCount = asteroid->polygonVertexCount;
 
 	TriangulatePolygonResult triangulateResult = triangulatePolygon(asteroid->polygon, asteroid->polygonVertexCount);
 	asteroid->collisionPolygonsCount = triangulateResult.vertexCount / 3;
@@ -640,7 +637,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (!asteroid->active) {
 				continue;
 			}
-			if (isPointInPolygon(g_bullets[i].position, asteroid->transformedPolygon, asteroid->transformedPolygonVertexCount)) {
+			if (isPointInPolygon(g_bullets[i].position, asteroid->transformedPolygon, asteroid->polygonVertexCount)) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
 				break;
@@ -723,7 +720,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 #if 1
 		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_asteroids[i].transformedPolygon);
-		glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].transformedPolygonVertexCount);
+		glDrawArrays(GL_LINE_LOOP, 0, g_asteroids[i].polygonVertexCount);
 #endif
 
 #if 1
