@@ -184,6 +184,7 @@ struct ShipFragment {
 
 struct Bullet {
 	bool active;
+	bool player;
 	vec2 position;
 	vec2 velocity;
 	float distance;
@@ -212,6 +213,8 @@ struct Ufo {
 	MyRectangle bounds;
 	float changeDirectionTimer;
 	float changeDirectionDuration;
+	float nextShotTimer;
+	float nextShotDuration;
 };
 
 Input g_input;
@@ -221,7 +224,7 @@ static GLint g_colorUniform;
 static Player g_player;
 static Asteroid g_asteroids[20];
 static ShipFragment g_shipFragments[5];
-static Bullet g_bullets[10];
+static Bullet g_bullets[32];
 static float g_levelEndTimer;
 static int g_currentLevel = 2;
 static float g_windowWidth;
@@ -492,6 +495,7 @@ bool initGame() {
 	g_ufo.velocity = Vec2(100.0f, 0.0f);
 	g_ufo.scale = 40;
 	g_ufo.changeDirectionDuration = 2.0f;
+	g_ufo.nextShotDuration = 0.5f;
 
 	transformUfo(&g_ufo);
 
@@ -608,6 +612,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			for (int i = 0; i < arrayCount(g_bullets); ++i) {
 				if (!g_bullets[i].active) {
 					g_bullets[i].active = true;
+					g_bullets[i].player = true;
 					g_bullets[i].position = g_player.pos;
 					g_bullets[i].velocity = playerDirection * BULLET_SPEED;
 					g_bullets[i].distance = 0;
@@ -642,6 +647,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 
 	if (g_ufo.active) {
 		g_ufo.position += g_ufo.velocity * dt;
+
 		g_ufo.changeDirectionTimer += dt;
 		if (g_ufo.changeDirectionTimer > g_ufo.changeDirectionDuration) {
 			float speed = len(g_ufo.velocity);
@@ -654,8 +660,26 @@ void gameUpdateAndRender(float dt, float *touches) {
 			}
 			g_ufo.velocity = normalize(g_ufo.velocity) * speed;
 			g_ufo.changeDirectionTimer = 0;
-			g_ufo.changeDirectionDuration = randomFloat(0.5f, 2.0f);
+			g_ufo.changeDirectionDuration = randomFloat(5, 20) / 10.0f;
 		}
+
+		g_ufo.nextShotTimer += dt;
+		if (g_ufo.nextShotTimer > g_ufo.nextShotDuration) {
+			for (int i = 0; i < arrayCount(g_bullets); i++) {
+				Bullet *bullet = &g_bullets[i];
+				if (!bullet->active) {
+					bullet->active = true;
+					bullet->player = false;
+					bullet->position = g_ufo.position;
+					bullet->velocity = randomDirection() * BULLET_SPEED;
+					bullet->distance = 0;
+					break;
+				}
+			}
+			g_ufo.nextShotTimer = 0;
+			g_ufo.nextShotDuration = randomFloat(5, 20) / 10.0f;
+		}
+
 		transformUfo(&g_ufo);
 	}
 
