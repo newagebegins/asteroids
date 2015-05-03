@@ -307,6 +307,18 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 	transformAsteroid(asteroid);
 }
 
+static void destroyPlayer() {
+	g_player.alive = false;
+	g_player.reviveTimer = 0;
+	for (int k = 0; k < arrayCount(g_shipFragments); ++k) {
+		float offsetRange = 10.0f;
+		g_shipFragments[k].position = g_player.pos + Vec2(randomFloat(-offsetRange, offsetRange), randomFloat(-offsetRange, offsetRange));
+		g_shipFragments[k].velocity = randomDirection() * randomFloat(20, 50);
+		g_shipFragments[k].scale = 20.0f;
+		g_shipFragments[k].angle = randomAngle();
+	}
+}
+
 static void destroyAsteroid(Asteroid *asteroid) {
 	// Split the asteroid into smaller ones.
 	if (asteroid->scale > ASTEROID_SCALE_SMALL) {
@@ -709,7 +721,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 					}
 				}
 				g_ufo.nextShotTimer = 0;
-				g_ufo.nextShotDuration = randomFloat(5, 20) / 10.0f;
+				g_ufo.nextShotDuration = randomFloat(5, 20) / 200.0f;
 			}
 
 			transformUfo(&g_ufo);
@@ -743,15 +755,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 				triangle[2] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 2];
 				if (polygonsIntersect(g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon), triangle, 3)) {
 					destroyAsteroid(&g_asteroids[i]);
-					g_player.alive = false;
-					g_player.reviveTimer = 0;
-					for (int k = 0; k < arrayCount(g_shipFragments); ++k) {
-						float offsetRange = 10.0f;
-						g_shipFragments[k].position = g_player.pos + Vec2(randomFloat(-offsetRange, offsetRange), randomFloat(-offsetRange, offsetRange));
-						g_shipFragments[k].velocity = randomDirection() * randomFloat(20, 50);
-						g_shipFragments[k].scale = 20.0f;
-						g_shipFragments[k].angle = randomAngle();
-					}
+					destroyPlayer();
 					collision = true;
 				}
 			}
@@ -806,6 +810,15 @@ void gameUpdateAndRender(float dt, float *touches) {
 				destroyAsteroid(asteroid);
 				break;
 			}
+		}
+
+		// TODO: Test the case when high-speed bullet passes through the player
+		if (g_bullets[i].active &&
+			!g_bullets[i].player &&
+			isPointInPolygon(g_bullets[i].position, g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon)))
+		{
+			g_bullets[i].active = false;
+			destroyPlayer();
 		}
 	}
 
