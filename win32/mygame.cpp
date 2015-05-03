@@ -235,6 +235,8 @@ static float g_viewportWidth;
 static float g_viewportHeight;
 static ExplosionParticle g_explosionParticles[30];
 static Ufo g_ufo;
+static float g_nextUfoTimer;
+static float g_nextUfoDuration;
 
 static void transformAsteroid(Asteroid *asteroid) {
 	mat4 translationMatrix = createTranslationMatrix(asteroid->position.x, asteroid->position.y);
@@ -489,15 +491,7 @@ bool initGame() {
 	g_ufo.innerLines[3] = Vec2(0.9f, -0.1f);
 
 	triangulatePolygon(g_ufo.outlineVertices, arrayCount(g_ufo.outlineVertices), g_ufo.collisionTriangles, &g_ufo.collisionVertexCount);
-
-	g_ufo.active = true;
-	g_ufo.position = Vec2(200.0f, 300.0f);
-	g_ufo.velocity = Vec2(100.0f, 0.0f);
-	g_ufo.scale = 40;
-	g_ufo.changeDirectionDuration = 2.0f;
-	g_ufo.nextShotDuration = 0.5f;
-
-	transformUfo(&g_ufo);
+	g_nextUfoDuration = 0.0f;
 
 	startLevel();
 	return true;
@@ -643,6 +637,32 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 
 		transformAsteroid(&g_asteroids[i]);
+	}
+
+	if (!g_ufo.active) {
+		g_nextUfoTimer += dt;
+		if (g_nextUfoTimer > g_nextUfoDuration) {
+			g_nextUfoTimer = 0;
+			g_nextUfoDuration = 1.0f;
+
+			g_ufo.active = true;
+			bool moveFromLeftToRight = randomInt(1) == 1;
+			float x = 0.0f;
+			float y = randomFloat(0.0f, SCREEN_HEIGHT);
+			if (moveFromLeftToRight) {
+				x = 0;
+				g_ufo.velocity = Vec2(100.0f, 0.0f);
+			}
+			else {
+				x = SCREEN_WIDTH;
+				g_ufo.velocity = Vec2(-100.0f, 0.0f);
+			}
+			g_ufo.position = Vec2(x, y);
+			g_ufo.scale = 40;
+			g_ufo.changeDirectionDuration = 2.0f;
+			g_ufo.nextShotDuration = 0.5f;
+			transformUfo(&g_ufo);
+		}
 	}
 
 	if (g_ufo.active) {
