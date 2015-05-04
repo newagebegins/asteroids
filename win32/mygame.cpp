@@ -541,7 +541,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 			float y_ = g_windowHeight - flippedY;
 			float x = ((x_ - g_viewportX) / g_viewportWidth) * SCREEN_WIDTH;
 			float y = ((y_ - g_viewportY) / g_viewportHeight) * SCREEN_HEIGHT;
-			//LOGI("x = %f, y = %f", x, y);
 
 			if (x >= button->position.x &&
 				x < button->position.x + button->dimensions.x &&
@@ -721,34 +720,38 @@ void gameUpdateAndRender(float dt, float *touches) {
 					}
 				}
 				g_ufo.nextShotTimer = 0;
-				g_ufo.nextShotDuration = randomFloat(5, 20) / 200.0f;
+				g_ufo.nextShotDuration = randomFloat(5, 20) / 10.0f;
 			}
 
 			transformUfo(&g_ufo);
 		}
 	}
 
-	mat4 playerTranslationMatrix = {};
-	mat4 playerScaleMatrix = {};
-	mat4 playerRotationMatrix = {};
-	mat4 playerModelMatrix = {};
 	if (g_player.alive) {
-		playerTranslationMatrix = createTranslationMatrix(g_player.pos.x, g_player.pos.y);
-		playerScaleMatrix = createScaleMatrix(20.0f);
-		playerRotationMatrix = createRotationMatrix(PI / 2.0f - g_player.angle);
-		playerModelMatrix = playerTranslationMatrix * playerRotationMatrix * playerScaleMatrix;
+		mat4 playerTranslationMatrix = createTranslationMatrix(g_player.pos.x, g_player.pos.y);
+		mat4 playerScaleMatrix = createScaleMatrix(20.0f);
+		mat4 playerRotationMatrix = createRotationMatrix(PI / 2.0f - g_player.angle);
+		mat4 playerModelMatrix = playerTranslationMatrix * playerRotationMatrix * playerScaleMatrix;
 
-		for (int j = 0; j < arrayCount(g_player.collisionPolygon); ++j) {
-			g_player.transformedCollisionPolygon[j] = playerModelMatrix * g_player.collisionPolygon[j];
+		for (int i = 0; i < arrayCount(g_player.collisionPolygon); ++i) {
+			g_player.transformedCollisionPolygon[i] = playerModelMatrix * g_player.collisionPolygon[i];
+		}
+		for (int i = 0; i < PLAYER_SHIP_VERTICES_COUNT; ++i) {
+			transformedPlayerShipVertices[i] = playerModelMatrix * playerShipVertices[i];
+		}
+		for (int i = 0; i < PLAYER_FLAME_VERTICES_COUNT; ++i) {
+			transformedPlayerFlameVertices[i] = playerModelMatrix * playerFlameVertices[i];
 		}
 
-		bool collision = false;
-		for (int i = 0; i < arrayCount(g_asteroids) && !collision; ++i) {
+		// Check for collision between the player and asteroids.
+
+		bool collisionWithAsteroid = false;
+		for (int i = 0; i < arrayCount(g_asteroids) && !collisionWithAsteroid; ++i) {
 			if (!g_asteroids[i].active) {
 				continue;
 			}
 			int trianglesCount = g_asteroids[i].collisionVertexCount/3;
-			for (int j = 0; j < trianglesCount && !collision; ++j) {
+			for (int j = 0; j < trianglesCount && !collisionWithAsteroid; ++j) {
 				vec2 triangle[3];
 				triangle[0] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 0];
 				triangle[1] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 1];
@@ -756,7 +759,23 @@ void gameUpdateAndRender(float dt, float *touches) {
 				if (polygonsIntersect(g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon), triangle, 3)) {
 					destroyAsteroid(&g_asteroids[i]);
 					destroyPlayer();
-					collision = true;
+					collisionWithAsteroid = true;
+				}
+			}
+		}
+
+		// Check for collision between the player and the UFO.
+
+		if (g_ufo.active) {
+			int trianglesCount = g_ufo.collisionVertexCount / 3;
+			for (int j = 0; j < trianglesCount; ++j) {
+				vec2 triangle[3];
+				triangle[0] = g_ufo.transformedCollisionTriangles[j * 3 + 0];
+				triangle[1] = g_ufo.transformedCollisionTriangles[j * 3 + 1];
+				triangle[2] = g_ufo.transformedCollisionTriangles[j * 3 + 2];
+				if (polygonsIntersect(g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon), triangle, 3)) {
+					destroyPlayer();
+					break;
 				}
 			}
 		}
@@ -793,8 +812,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 			g_bullets[i].active = false;
 			continue;
 		}
-
-		
 
 		// World wrapping.
 		float extraSize = 0;
@@ -855,16 +872,10 @@ void gameUpdateAndRender(float dt, float *touches) {
 #endif
 
 	if (g_player.alive) {
-		for (int j = 0; j < PLAYER_SHIP_VERTICES_COUNT; ++j) {
-			transformedPlayerShipVertices[j] = playerModelMatrix * playerShipVertices[j];
-		}
 		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedPlayerShipVertices);
 		glDrawArrays(GL_LINES, 0, PLAYER_SHIP_VERTICES_COUNT);
 
 		if (g_player.flameVisible) {
-			for (int j = 0; j < PLAYER_FLAME_VERTICES_COUNT; ++j) {
-				transformedPlayerFlameVertices[j] = playerModelMatrix * playerFlameVertices[j];
-			}
 			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedPlayerFlameVertices);
 			glDrawArrays(GL_LINES, 0, PLAYER_FLAME_VERTICES_COUNT);
 		}
