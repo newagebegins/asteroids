@@ -47,21 +47,6 @@ static GLuint compileShader(const char *source, GLenum shaderType) {
 	return shader;
 }
 
-#define PLAYER_SHIP_VERTICES_COUNT 6
-static vec2 playerShipVertices[PLAYER_SHIP_VERTICES_COUNT] = {
-	Vec2(0.0f, 0.9f), Vec2(-0.7f, -0.9f), // ship left side
-	Vec2(0.0f, 0.9f), Vec2(0.7f, -0.9f), // ship right side
-	Vec2(-0.54f, -0.49f), Vec2(0.54f, -0.49f), // ship bottom side
-};
-static vec2 transformedPlayerShipVertices[PLAYER_SHIP_VERTICES_COUNT] = {};
-
-#define PLAYER_FLAME_VERTICES_COUNT 4
-static vec2 playerFlameVertices[PLAYER_FLAME_VERTICES_COUNT] = {
-	Vec2(-0.3f, -0.49f), Vec2(0.0f, -1.0f), // flame left side
-	Vec2(0.3f, -0.49f), Vec2(0.0f, -1.0f), // flame right side
-};
-static vec2 transformedPlayerFlameVertices[PLAYER_FLAME_VERTICES_COUNT] = {};
-
 #define SHIP_FRAGMENT_VERTICES_COUNT 2
 static vec2 shipFragmentVertices[SHIP_FRAGMENT_VERTICES_COUNT] = {
 	Vec2(-0.5f, 0.0f),
@@ -78,10 +63,33 @@ struct Player {
 	float reviveTimer;
 	float flameFlickTimer;
 	bool flameVisible;
+	
 	vec2 collisionPolygon[3];
 	vec2 transformedCollisionPolygon[3];
+	
+	vec2 shipVertices[6];
+	vec2 transformedShipVertices[6];
+
+	vec2 flameVertices[4];
+	vec2 transformedFlameVertices[4];
 };
-inline void initPlayer(Player *player) {
+static void transformPlayer(Player *player) {
+	mat4 translationMatrix = createTranslationMatrix(player->pos.x, player->pos.y);
+	mat4 scaleMatrix = createScaleMatrix(20.0f);
+	mat4 rotationMatrix = createRotationMatrix(PI / 2.0f - player->angle);
+	mat4 modelMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+
+	for (int i = 0; i < arrayCount(player->collisionPolygon); ++i) {
+		player->transformedCollisionPolygon[i] = modelMatrix * player->collisionPolygon[i];
+	}
+	for (int i = 0; i < arrayCount(player->shipVertices); ++i) {
+		player->transformedShipVertices[i] = modelMatrix * player->shipVertices[i];
+	}
+	for (int i = 0; i < arrayCount(player->flameVertices); ++i) {
+		player->transformedFlameVertices[i] = modelMatrix * player->flameVertices[i];
+	}
+}
+static void initPlayer(Player *player) {
 	player->alive = true;
 	player->pos = Vec2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 	player->vel = Vec2(0.0f, 0.0f);
@@ -93,6 +101,8 @@ inline void initPlayer(Player *player) {
 	player->collisionPolygon[0] = Vec2(0.0f, 0.9f);
 	player->collisionPolygon[1] = Vec2(-0.54f, -0.49f);
 	player->collisionPolygon[2] = Vec2(0.54f, -0.49f);
+
+	transformPlayer(player);
 }
 
 #define MAX_ASTEROID_COLLISION_VERTEX_COUNT 64
@@ -480,6 +490,23 @@ bool initGame() {
 	g_input.forwardButton.position = Vec2(g_input.fireButton.position.x - g_input.fireButton.dimensions.x, 0);
 	g_input.forwardButton.dimensions = g_input.leftButton.dimensions;
 
+	// ship left side
+	g_player.shipVertices[0] = Vec2(0.0f, 0.9f);
+	g_player.shipVertices[1] = Vec2(-0.7f, -0.9f);
+	// ship right side
+	g_player.shipVertices[2] = Vec2(0.0f, 0.9f);
+	g_player.shipVertices[3] = Vec2(0.7f, -0.9f);
+	// ship bottom side
+	g_player.shipVertices[4] = Vec2(-0.54f, -0.49f);
+	g_player.shipVertices[5] = Vec2(0.54f, -0.49f);
+
+	// flame left side
+	g_player.flameVertices[0] = Vec2(-0.3f, -0.49f);
+	g_player.flameVertices[1] = Vec2(0.0f, -1.0f);
+	// flame right side
+	g_player.flameVertices[2] = Vec2(0.3f, -0.49f);
+	g_player.flameVertices[3] = Vec2(0.0f, -1.0f);
+
 	triangulatePolygon(asteroidVertices1, arrayCount(asteroidVertices1), asteroidCollisionTriangles1, &asteroidCollisionVertexCount1);
 	triangulatePolygon(asteroidVertices2, arrayCount(asteroidVertices2), asteroidCollisionTriangles2, &asteroidCollisionVertexCount2);
 	triangulatePolygon(asteroidVertices3, arrayCount(asteroidVertices3), asteroidCollisionTriangles3, &asteroidCollisionVertexCount3);
@@ -589,6 +616,8 @@ void gameUpdateAndRender(float dt, float *touches) {
 			g_player.vel = normalize(g_player.vel)*MAX_PLAYER_SPEED;
 		}
 		g_player.pos += g_player.vel*dt;
+
+		transformPlayer(&g_player);
 
 		// World wrapping for the player ship.
 		float playerExtraSize = 20.0f;
@@ -724,21 +753,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 	}
 
 	if (g_player.alive) {
-		mat4 playerTranslationMatrix = createTranslationMatrix(g_player.pos.x, g_player.pos.y);
-		mat4 playerScaleMatrix = createScaleMatrix(20.0f);
-		mat4 playerRotationMatrix = createRotationMatrix(PI / 2.0f - g_player.angle);
-		mat4 playerModelMatrix = playerTranslationMatrix * playerRotationMatrix * playerScaleMatrix;
-
-		for (int i = 0; i < arrayCount(g_player.collisionPolygon); ++i) {
-			g_player.transformedCollisionPolygon[i] = playerModelMatrix * g_player.collisionPolygon[i];
-		}
-		for (int i = 0; i < PLAYER_SHIP_VERTICES_COUNT; ++i) {
-			transformedPlayerShipVertices[i] = playerModelMatrix * playerShipVertices[i];
-		}
-		for (int i = 0; i < PLAYER_FLAME_VERTICES_COUNT; ++i) {
-			transformedPlayerFlameVertices[i] = playerModelMatrix * playerFlameVertices[i];
-		}
-
 		// Check for collision between the player and asteroids.
 		bool collisionWithAsteroid = false;
 		for (int i = 0; i < arrayCount(g_asteroids) && !collisionWithAsteroid; ++i) {
@@ -874,12 +888,12 @@ void gameUpdateAndRender(float dt, float *touches) {
 #endif
 
 	if (g_player.alive) {
-		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedPlayerShipVertices);
-		glDrawArrays(GL_LINES, 0, PLAYER_SHIP_VERTICES_COUNT);
+		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_player.transformedShipVertices);
+		glDrawArrays(GL_LINES, 0, arrayCount(g_player.transformedShipVertices));
 
 		if (g_player.flameVisible) {
-			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedPlayerFlameVertices);
-			glDrawArrays(GL_LINES, 0, PLAYER_FLAME_VERTICES_COUNT);
+			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, g_player.transformedFlameVertices);
+			glDrawArrays(GL_LINES, 0, arrayCount(g_player.transformedFlameVertices));
 		}
 #if 0
 		float velScale = 1.0f;
