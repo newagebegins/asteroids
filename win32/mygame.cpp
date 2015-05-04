@@ -319,6 +319,27 @@ static void destroyPlayer() {
 	}
 }
 
+static void createExplosion(vec2 position) {
+	int numParticlesToCreate = randomInt(4, 10);
+	int numParticlesCreated = 0;
+	for (int particleIndex = 0;
+		particleIndex < arrayCount(g_explosionParticles) && numParticlesCreated < numParticlesToCreate;
+		++particleIndex)
+	{
+		ExplosionParticle *particle = &g_explosionParticles[particleIndex];
+		if (particle->active) {
+			continue;
+		}
+		particle->active = true;
+		particle->position = position;
+		particle->velocity = randomDirection() * randomFloat(50, 200);
+		particle->distance = 0;
+		particle->maxDistance = randomFloat(20, 100);
+
+		numParticlesCreated++;
+	}
+}
+
 static void destroyAsteroid(Asteroid *asteroid) {
 	// Split the asteroid into smaller ones.
 	if (asteroid->scale > ASTEROID_SCALE_SMALL) {
@@ -350,27 +371,7 @@ static void destroyAsteroid(Asteroid *asteroid) {
 			}
 		}
 	}
-
-	// Create explosion particles.
-	int numParticlesToCreate = randomInt(4, 10);
-	int numParticlesCreated = 0;
-	for (int particleIndex = 0;
-		particleIndex < arrayCount(g_explosionParticles) && numParticlesCreated < numParticlesToCreate;
-		++particleIndex)
-	{
-		ExplosionParticle *particle = &g_explosionParticles[particleIndex];
-		if (particle->active) {
-			continue;
-		}
-		particle->active = true;
-		particle->position = asteroid->position;
-		particle->velocity = randomDirection() * randomFloat(50, 200);
-		particle->distance = 0;
-		particle->maxDistance = randomFloat(20, 100);
-
-		numParticlesCreated++;
-	}
-
+	createExplosion(asteroid->position);
 	asteroid->active = false;
 }
 
@@ -742,7 +743,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 
 		// Check for collision between the player and asteroids.
-
 		bool collisionWithAsteroid = false;
 		for (int i = 0; i < arrayCount(g_asteroids) && !collisionWithAsteroid; ++i) {
 			if (!g_asteroids[i].active) {
@@ -763,7 +763,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 
 		// Check for collision between the player and the UFO.
-
 		if (g_ufo.active) {
 			int trianglesCount = g_ufo.collisionVertexCount / 3;
 			for (int j = 0; j < trianglesCount; ++j) {
@@ -832,7 +831,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (!asteroid->active) {
 				continue;
 			}
-			// TODO: Maybe use line intersection tests?
 			if (isPointInPolygon(g_bullets[i].position, asteroid->transformedPolygon, asteroid->vertexCount)) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
@@ -840,7 +838,12 @@ void gameUpdateAndRender(float dt, float *touches) {
 			}
 		}
 
-		// TODO: Check for collisions between player bullets and the UFO.
+		// Check for collisions between player bullets and the UFO.
+		if (g_ufo.active && g_bullets[i].player && isPointInPolygon(g_bullets[i].position, g_ufo.transformedOutlineVertices, arrayCount(g_ufo.transformedOutlineVertices))) {
+			g_bullets[i].active = false;
+			g_ufo.active = false;
+			createExplosion(g_ufo.position);
+		}
 	}
 
 	for (int i = 0; i < arrayCount(g_explosionParticles); ++i) {
