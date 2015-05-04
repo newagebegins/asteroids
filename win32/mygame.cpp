@@ -798,6 +798,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 
 		vec2 offset = g_bullets[i].velocity * dt;
 
+		// Check for collisions between enemy bullets and the player.
 		if (g_player.alive && !g_bullets[i].player) {
 			if (lineIntersectsPolygon(g_bullets[i].position, g_bullets[i].position + offset, g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon))) {
 				g_bullets[i].active = false;
@@ -813,7 +814,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			continue;
 		}
 
-		// World wrapping.
+		// World wrapping for bullets.
 		float extraSize = 0;
 		if (g_bullets[i].position.x > (SCREEN_WIDTH + extraSize)) {
 			g_bullets[i].position.x = -extraSize;
@@ -828,17 +829,21 @@ void gameUpdateAndRender(float dt, float *touches) {
 			g_bullets[i].position.y = SCREEN_HEIGHT + extraSize;
 		}
 
+		// Check for collisions between bullets and asteroids.
 		for (int asteroidIndex = 0; asteroidIndex < arrayCount(g_asteroids); ++asteroidIndex) {
 			Asteroid *asteroid = &g_asteroids[asteroidIndex];
 			if (!asteroid->active) {
 				continue;
 			}
+			// TODO: Maybe use line intersection tests?
 			if (isPointInPolygon(g_bullets[i].position, asteroid->transformedPolygon, asteroid->vertexCount)) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
 				break;
 			}
 		}
+
+		// TODO: Check for collisions between player bullets and the UFO.
 	}
 
 	for (int i = 0; i < arrayCount(g_explosionParticles); ++i) {
