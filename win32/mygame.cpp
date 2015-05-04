@@ -247,6 +247,7 @@ static ExplosionParticle g_explosionParticles[30];
 static Ufo g_ufo;
 static float g_nextUfoTimer;
 static float g_nextUfoDuration;
+static int g_playerLivesCount = 3;
 
 static void transformAsteroid(Asteroid *asteroid) {
 	mat4 translationMatrix = createTranslationMatrix(asteroid->position.x, asteroid->position.y);
@@ -320,6 +321,7 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 static void destroyPlayer() {
 	g_player.alive = false;
 	g_player.reviveTimer = 0;
+	g_playerLivesCount--;
 	for (int k = 0; k < arrayCount(g_shipFragments); ++k) {
 		float offsetRange = 10.0f;
 		g_shipFragments[k].position = g_player.pos + Vec2(randomFloat(-offsetRange, offsetRange), randomFloat(-offsetRange, offsetRange));
@@ -999,6 +1001,18 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 	}
 #endif
+
+	for (int i = 0; i < g_playerLivesCount; i++) {
+		mat4 translationMatrix = createTranslationMatrix(30 + i * 21, 480);
+		mat4 scaleMatrix = createScaleMatrix(12.0f);
+		mat4 modelMatrix = translationMatrix * scaleMatrix;
+		vec2 transformedShipVertices[arrayCount(g_player.shipVertices)];
+		for (int j = 0; j < arrayCount(g_player.shipVertices); ++j) {
+			transformedShipVertices[j] = modelMatrix * g_player.shipVertices[j];
+		}
+		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedShipVertices);
+		glDrawArrays(GL_LINES, 0, arrayCount(transformedShipVertices));
+	}
 
 	for (int i = 0; i < BUTTONS_COUNT; ++i) {
 		Button *button = &g_input.buttons[i];
