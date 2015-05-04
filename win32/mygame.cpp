@@ -348,9 +348,6 @@ static void destroyAsteroid(Asteroid *asteroid) {
 				if (g_asteroids[i].active) {
 					continue;
 				}
-				vec2 randOffset = randomDirection() * randomFloat(20, 60);
-				vec2 position = asteroid->position + randOffset;
-
 				float curVelAngle = atan2(asteroid->velocity.y, asteroid->velocity.x) * RAD_TO_DEG;
 				float offsetRange = 60.0f;
 				float randVelAngle = randomFloat(curVelAngle - offsetRange, curVelAngle + offsetRange) * DEG_TO_RAD;
@@ -366,7 +363,7 @@ static void destroyAsteroid(Asteroid *asteroid) {
 					scale = ASTEROID_SCALE_SMALL;
 				}
 
-				createAsteroid(&g_asteroids[i], position, velocity, scale);
+				createAsteroid(&g_asteroids[i], asteroid->position, velocity, scale);
 				break;
 			}
 		}
@@ -989,6 +986,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 		glDrawArrays(GL_POINTS, 0, 1);
 	}
 
+#ifndef _WIN32
 	for (int i = 0; i < BUTTONS_COUNT; ++i) {
 		Button *button = &g_input.buttons[i];
 		float buttonVertices[] = {
@@ -1006,6 +1004,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			glDrawArrays(GL_LINE_LOOP, 0, arrayCount(buttonVertices) / 2);
 		}
 	}
+#endif
 
 	for (int i = 0; i < BUTTONS_COUNT; ++i) {
 		Button *button = &g_input.buttons[i];
