@@ -697,7 +697,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 				float speed = len(g_ufo.velocity);
 				g_ufo.velocity = normalize(g_ufo.velocity);
 				if (g_ufo.velocity.y == 0.0f) {
-					g_ufo.velocity.y = randomInt(1) ? 1 : -1;
+					g_ufo.velocity.y = randomInt(1) ? 1.0f : -1.0f;
 				}
 				else {
 					g_ufo.velocity.y = 0;
@@ -778,12 +778,23 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 
 		vec2 offset = g_bullets[i].velocity * dt;
+
+		if (g_player.alive && !g_bullets[i].player) {
+			if (lineIntersectsPolygon(g_bullets[i].position, g_bullets[i].position + offset, g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon))) {
+				g_bullets[i].active = false;
+				destroyPlayer();
+				continue;
+			}
+		}
+
 		g_bullets[i].position += offset;
 		g_bullets[i].distance += len(offset);
 		if (g_bullets[i].distance > MAX_BULLET_DISTANCE) {
 			g_bullets[i].active = false;
 			continue;
 		}
+
+		
 
 		// World wrapping.
 		float extraSize = 0;
@@ -810,15 +821,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 				destroyAsteroid(asteroid);
 				break;
 			}
-		}
-
-		// TODO: Test the case when high-speed bullet passes through the player
-		if (g_bullets[i].active &&
-			!g_bullets[i].player &&
-			isPointInPolygon(g_bullets[i].position, g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon)))
-		{
-			g_bullets[i].active = false;
-			destroyPlayer();
 		}
 	}
 

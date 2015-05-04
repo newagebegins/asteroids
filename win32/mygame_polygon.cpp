@@ -97,3 +97,44 @@ bool isPointInPolygon(vec2 p, vec2 *vertices, int vertexCount) {
 	}
 	return inside;
 }
+
+bool lineSegmentsIntersect(vec2 p1, vec2 p2, vec2 p3, vec2 p4) {
+	// Must use double precision for correct results!
+
+	double x1 = p1.x, x2 = p2.x, x3 = p3.x, x4 = p4.x;
+	double y1 = p1.y, y2 = p2.y, y3 = p3.y, y4 = p4.y;
+
+	double d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+	if (d == 0) {
+		return false;
+	}
+
+	double pre = (x1*y2 - y1*x2), post = (x3*y4 - y3*x4);
+	double x = (pre * (x3 - x4) - (x1 - x2) * post) / d;
+	double y = (pre * (y3 - y4) - (y1 - y2) * post) / d;
+
+	// Check if the x and y coordinates are within both lines
+	if (x < fmin(x1, x2) || x > fmax(x1, x2) ||
+		x < fmin(x3, x4) || x > fmax(x3, x4))
+	{
+		return false;
+	}
+	if (y < fmin(y1, y2) || y > fmax(y1, y2) ||
+		y < fmin(y3, y4) || y > fmax(y3, y4))
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool lineIntersectsPolygon(vec2 p1, vec2 p2, vec2 *polygon, int vertexCount) {
+	for (int i = 0; i < vertexCount; i++) {
+		vec2 p3 = polygon[i];
+		vec2 p4 = polygon[(i + 1) % vertexCount];
+		if (lineSegmentsIntersect(p1, p2, p3, p4)) {
+			return true;
+		}
+	}
+	return false;
+}
