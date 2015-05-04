@@ -632,8 +632,9 @@ void gameUpdateAndRender(float dt, float *touches) {
 			continue;
 		}
 		g_asteroids[i].position += g_asteroids[i].velocity * dt;
+		transformAsteroid(&g_asteroids[i]);
 
-		// World wrapping.
+		// World wrapping for asteroids.
 		if (g_asteroids[i].bounds.min.x > SCREEN_WIDTH) {
 			g_asteroids[i].position.x = -(g_asteroids[i].bounds.max.x - g_asteroids[i].position.x);
 		}
@@ -646,8 +647,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 		else if (g_asteroids[i].bounds.max.y < 0) {
 			g_asteroids[i].position.y = SCREEN_HEIGHT + (g_asteroids[i].position.y - g_asteroids[i].bounds.min.y);
 		}
-
-		transformAsteroid(&g_asteroids[i]);
 	}
 
 	if (!g_ufo.active) {
@@ -675,8 +674,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			transformUfo(&g_ufo);
 		}
 	}
-
-	if (g_ufo.active) {
+	else {
 		g_ufo.position += g_ufo.velocity * dt;
 
 		if (g_ufo.bounds.max.x < 0 || g_ufo.bounds.min.x > SCREEN_WIDTH) {
