@@ -10,12 +10,14 @@
 
 #include "../../win32/mygame.h"
 
-#define  LOG_TAG    "MyGame"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
-
-void androidPlatformLog(const char *string) {
-	LOGI("%s", string);
+void androidPlatformLog(const char *format, ...) {
+	// "__builtin_" is needed to fix Eclipse's C indexer errors.
+	__builtin_va_list  argptr;
+	__builtin_va_start(argptr, format);
+	char str[1024];
+	vsprintf(str, format, argptr);
+	__android_log_write(ANDROID_LOG_DEBUG, "MyGame", str);
+	__builtin_va_end(argptr);
 }
 
 #include <sys/time.h>
