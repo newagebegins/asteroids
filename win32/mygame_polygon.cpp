@@ -57,8 +57,7 @@ bool polygonsIntersect(vec2 *verticesA, int vertexCountA, vec2 *verticesB, int v
 		vec2 axis = normalize(Vec2(-edge.y, edge.x));
 		ProjectPolygonResult projectionA = projectPolygon(axis, verticesA, vertexCountA);
 		ProjectPolygonResult projectionB = projectPolygon(axis, verticesB, vertexCountB);
-		float distance = intervalDistance(projectionA.min, projectionA.max,
-			projectionB.min, projectionB.max);
+		float distance = intervalDistance(projectionA.min, projectionA.max, projectionB.min, projectionB.max);
 		if (distance > 0) {
 			return false;
 		}
@@ -134,6 +133,39 @@ bool lineIntersectsPolygon(vec2 p1, vec2 p2, vec2 *polygon, int vertexCount) {
 		vec2 p4 = polygon[(i + 1) % vertexCount];
 		if (lineSegmentsIntersect(p1, p2, p3, p4)) {
 			return true;
+		}
+	}
+	return false;
+}
+
+bool overlap(MyRectangle a, MyRectangle b) {
+	bool noOverlap =
+		a.min.x > b.max.x ||
+		b.min.x > a.max.x ||
+		a.min.y > b.max.y ||
+		b.min.y > a.max.y;
+	return !noOverlap;
+}
+
+bool polygonTrianglesIntersect(vec2 *trianglesA, int triangleCountA, vec2 *trianglesB, int triangleCountB) {
+	MyRectangle rectA = getPolygonBounds(trianglesA, triangleCountA * 3);
+	MyRectangle rectB = getPolygonBounds(trianglesB, triangleCountB * 3);
+	if (!overlap(rectA, rectB)) {
+		return false;
+	}
+	for (int iA = 0; iA < triangleCountA; ++iA) {
+		vec2 triangleA[3];
+		triangleA[0] = trianglesA[iA * 3 + 0];
+		triangleA[1] = trianglesA[iA * 3 + 1];
+		triangleA[2] = trianglesA[iA * 3 + 2];	
+		for (int iB = 0; iB < triangleCountB; ++iB) {
+			vec2 triangleB[3];
+			triangleB[0] = trianglesB[iB * 3 + 0];
+			triangleB[1] = trianglesB[iB * 3 + 1];
+			triangleB[2] = trianglesB[iB * 3 + 2];
+			if (polygonsIntersect(triangleB, 3, triangleA, 3)) {
+				return true;
+			}
 		}
 	}
 	return false;
