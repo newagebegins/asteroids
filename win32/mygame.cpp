@@ -674,6 +674,38 @@ void gameUpdateAndRender(float dt, float *touches) {
 		else if (g_asteroids[i].bounds.max.y < 0) {
 			g_asteroids[i].position.y = SCREEN_HEIGHT + (g_asteroids[i].position.y - g_asteroids[i].bounds.min.y);
 		}
+
+		bool collision = false;
+		int trianglesCount = g_asteroids[i].collisionVertexCount / 3;
+		for (int j = 0; j < trianglesCount && !collision; ++j) {
+			vec2 triangle[3];
+			triangle[0] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 0];
+			triangle[1] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 1];
+			triangle[2] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 2];
+			// Check for collision between the asteroid and the player.
+			if (g_player.alive && polygonsIntersect(g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon), triangle, 3)) {
+				destroyAsteroid(&g_asteroids[i]);
+				destroyPlayer();
+				collision = true;
+			}
+			// TODO: Better collision detection between two concave polygons!
+			// Check for collision between the asteroid and the UFO.
+			if (!collision && g_ufo.active) {
+				int trianglesCount2 = g_ufo.collisionVertexCount / 3;
+				for (int k = 0; k < trianglesCount && !collision; ++k) {
+					vec2 triangle2[3];
+					triangle2[0] = g_ufo.transformedCollisionTriangles[k * 3 + 0];
+					triangle2[1] = g_ufo.transformedCollisionTriangles[k * 3 + 1];
+					triangle2[2] = g_ufo.transformedCollisionTriangles[k * 3 + 2];
+					if (polygonsIntersect(triangle2, 3, triangle, 3)) {
+						destroyAsteroid(&g_asteroids[i]);
+						g_ufo.active = false;
+						createExplosion(g_ufo.position);
+						collision = true;
+					}
+				}
+			}
+		}
 	}
 
 	if (!g_ufo.active) {
@@ -753,26 +785,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 	}
 
 	if (g_player.alive) {
-		// Check for collision between the player and asteroids.
-		bool collisionWithAsteroid = false;
-		for (int i = 0; i < arrayCount(g_asteroids) && !collisionWithAsteroid; ++i) {
-			if (!g_asteroids[i].active) {
-				continue;
-			}
-			int trianglesCount = g_asteroids[i].collisionVertexCount/3;
-			for (int j = 0; j < trianglesCount && !collisionWithAsteroid; ++j) {
-				vec2 triangle[3];
-				triangle[0] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 0];
-				triangle[1] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 1];
-				triangle[2] = g_asteroids[i].transformedCollisionTriangles[j * 3 + 2];
-				if (polygonsIntersect(g_player.transformedCollisionPolygon, arrayCount(g_player.transformedCollisionPolygon), triangle, 3)) {
-					destroyAsteroid(&g_asteroids[i]);
-					destroyPlayer();
-					collisionWithAsteroid = true;
-				}
-			}
-		}
-
 		// Check for collision between the player and the UFO.
 		if (g_ufo.active) {
 			int trianglesCount = g_ufo.collisionVertexCount / 3;
