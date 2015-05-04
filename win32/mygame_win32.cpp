@@ -3,17 +3,13 @@
 #include "gl3w.h"
 #include "mygame.h"
 
-static void debugLog(char *format, ...) {
+void win32PlatformLog(const char *format, ...) {
 	va_list argptr;
 	va_start(argptr, format);
 	char str[1024];
 	vsprintf_s(str, format, argptr);
 	va_end(argptr);
 	OutputDebugString(str);
-}
-
-void win32PlatformLog(const char *string) {
-	debugLog("%s", string);
 }
 
 static HDC hDC;

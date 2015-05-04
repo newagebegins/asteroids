@@ -26,7 +26,7 @@
 
 #define arrayCount(array) (sizeof(array) / sizeof((array)[0]))
 
-void(*platformLog)(const char *);
+void(*platformLog)(const char *, ...);
 
 static GLuint compileShader(const char *source, GLenum shaderType) {
 	GLuint shader = glCreateShader(shaderType);

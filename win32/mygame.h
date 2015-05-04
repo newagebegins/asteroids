@@ -24,7 +24,7 @@ struct Input {
 };
 
 extern Input g_input;
-extern void(*platformLog)(const char *);
+extern void(*platformLog)(const char *, ...);
 
 void setViewport(float windowWidth, float windowHeight);
 bool initGame();
