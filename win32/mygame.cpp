@@ -815,18 +815,17 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 
 		// World wrapping for bullets.
-		float extraSize = 0;
-		if (g_bullets[i].position.x > (SCREEN_WIDTH + extraSize)) {
-			g_bullets[i].position.x = -extraSize;
+		if (g_bullets[i].position.x > SCREEN_WIDTH) {
+			g_bullets[i].position.x = 0;
 		}
-		else if (g_bullets[i].position.x < -extraSize) {
-			g_bullets[i].position.x = SCREEN_WIDTH + extraSize;
+		else if (g_bullets[i].position.x < 0) {
+			g_bullets[i].position.x = SCREEN_WIDTH;
 		}
-		if (g_bullets[i].position.y >(SCREEN_HEIGHT + extraSize)) {
-			g_bullets[i].position.y = -extraSize;
+		if (g_bullets[i].position.y > SCREEN_HEIGHT) {
+			g_bullets[i].position.y = 0;
 		}
-		else if (g_bullets[i].position.y < -extraSize) {
-			g_bullets[i].position.y = SCREEN_HEIGHT + extraSize;
+		else if (g_bullets[i].position.y < 0) {
+			g_bullets[i].position.y = SCREEN_HEIGHT;
 		}
 
 		// Check for collisions between bullets and asteroids.
