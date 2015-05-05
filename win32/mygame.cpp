@@ -832,9 +832,11 @@ void gameUpdateAndRender(float dt, float *touches) {
 		for (int i = 0; i < arrayCount(g_shipFragments); ++i) {
 			g_shipFragments[i].position += g_shipFragments[i].velocity * dt;
 		}
-		g_player.reviveTimer += dt;
-		if (g_player.reviveTimer > PLAYER_REVIVE_DURATION) {
-			initPlayer(&g_player);
+		if (g_playerLivesCount > 0) {
+			g_player.reviveTimer += dt;
+			if (g_player.reviveTimer > PLAYER_REVIVE_DURATION) {
+				initPlayer(&g_player);
+			}
 		}
 	}
 
@@ -1071,7 +1073,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 		glDrawArrays(GL_LINES, 0, arrayCount(transformedShipVertices));
 	}
 
-	{
+	if (g_playerLivesCount <= 0) {
 		char str[] = "GAME OVER";
 		for (int i = 0; i < arrayCount(str); ++i) {
 			if (!str[i]) {
