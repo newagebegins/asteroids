@@ -185,6 +185,63 @@ static vec2 g_asteroidVertices4[] = {
 static vec2 g_asteroidCollisionTriangles4[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
 static int g_asteroidCollisionVertexCount4;
 
+static vec2 g_letterVerticesA[] = {
+	Vec2(1.0f, -1.0f), Vec2(1.0f, 0.6f),
+	Vec2(1.0f, 0.6f), Vec2(0.6f, 1.0f),
+	Vec2(0.6f, 1.0f), Vec2(-0.6f, 1.0f),
+	Vec2(-0.6f, 1.0f), Vec2(-1.0f, 0.6f),
+	Vec2(-1.0f, 0.6f), Vec2(-1.0f, -1.0f),
+	Vec2(-1.0f, 0.0f), Vec2(1.0f, 0.0f),
+};
+static vec2 g_letterVerticesE[] = {
+	Vec2(1.0f, 1.0f), Vec2(-1.0f, 1.0f),
+	Vec2(-1.0f, 1.0f), Vec2(-1.0f, -1.0f),
+	Vec2(-1.0f, -1.0f), Vec2(1.0f, -1.0f),
+	Vec2(-1.0f, 0.2f), Vec2(0.6f, 0.2f),
+};
+static vec2 g_letterVerticesG[] = {
+	Vec2(1.0f, 0.6f), Vec2(0.6f, 1.0f),
+	Vec2(0.6f, 1.0f), Vec2(-0.6f, 1.0f),
+	Vec2(-0.6f, 1.0f), Vec2(-1.0f, 0.6f),
+	Vec2(-1.0f, 0.6f), Vec2(-1.0f, -0.6f),
+	Vec2(-1.0f, -0.6f), Vec2(-0.6f, -1.0f),
+	Vec2(-0.6f, -1.0f), Vec2(0.6f, -1.0f),
+	Vec2(0.6f, -1.0f), Vec2(1.0f, -0.6f),
+	Vec2(1.0f, -0.6f), Vec2(1.0f, 0.0f),
+	Vec2(1.0f, 0.0f), Vec2(0.0f, 0.0f),
+};
+static vec2 g_letterVerticesM[] = {
+	Vec2(1.0f, -1.0f), Vec2(1.0f, 1.0f),
+	Vec2(1.0f, 1.0f), Vec2(0.0f, 0.2f),
+	Vec2(0.0f, 0.2f), Vec2(-1.0f, 1.0f),
+	Vec2(-1.0f, 1.0f), Vec2(-1.0f, -1.0f),
+};
+static vec2 g_letterVerticesO[] = {
+	Vec2(1.0f, 0.6f), Vec2(0.6f, 1.0f),
+	Vec2(0.6f, 1.0f), Vec2(-0.6f, 1.0f),
+	Vec2(-0.6f, 1.0f), Vec2(-1.0f, 0.6f),
+	Vec2(-1.0f, 0.6f), Vec2(-1.0f, -0.6f),
+	Vec2(-1.0f, -0.6f), Vec2(-0.6f, -1.0f),
+	Vec2(-0.6f, -1.0f), Vec2(0.6f, -1.0f),
+	Vec2(0.6f, -1.0f), Vec2(1.0f, -0.6f),
+	Vec2(1.0f, -0.6f), Vec2(1.0f, 0.6f),
+};
+static vec2 g_letterVerticesR[] = {
+	Vec2(-1.0f, 0.0f), Vec2(0.6f, 0.0f),
+	Vec2(0.6f, 0.0f), Vec2(1.0f, 0.3f),
+	Vec2(1.0f, 0.3f), Vec2(1.0f, 0.7f),
+	Vec2(1.0f, 0.7f), Vec2(0.6f, 1.0f),
+	Vec2(0.6f, 1.0f), Vec2(-1.0f, 1.0f),
+	Vec2(-1.0f, 1.0f), Vec2(-1.0f, -1.0f),
+	Vec2(0.2f, 0.0f), Vec2(1.0f, -1.0f),
+};
+static vec2 g_letterVerticesV[] = {
+	Vec2(-1.0f, 1.0f), Vec2(-1.0f, -0.2f),
+	Vec2(-1.0f, -0.2f), Vec2(0.0f, -1.0f),
+	Vec2(0.0f, -1.0f), Vec2(1.0f, -0.2f),
+	Vec2(1.0f, -0.2f), Vec2(1.0f, 1.0f),
+};
+
 struct ShipFragment {
 	vec2 position;
 	vec2 velocity;
@@ -1012,6 +1069,62 @@ void gameUpdateAndRender(float dt, float *touches) {
 		}
 		glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedShipVertices);
 		glDrawArrays(GL_LINES, 0, arrayCount(transformedShipVertices));
+	}
+
+	{
+		char str[] = "GAME OVER";
+		for (int i = 0; i < arrayCount(str); ++i) {
+			if (!str[i]) {
+				break;
+			}
+			mat4 translationMatrix = createTranslationMatrix(370 + i * 27, 300);
+			mat4 scaleMatrix = createScaleMatrix(10.0f);
+			mat4 modelMatrix = translationMatrix * scaleMatrix;
+			vec2 transformedLetterVertices[64];
+			int vertexCount = 0;
+			vec2 *vertices = 0;
+			switch (str[i]) {
+			case 'A':
+				vertexCount = arrayCount(g_letterVerticesA);
+				vertices = g_letterVerticesA;
+				break;
+
+			case 'E':
+				vertexCount = arrayCount(g_letterVerticesE);
+				vertices = g_letterVerticesE;
+				break;
+			
+			case 'G':
+				vertexCount = arrayCount(g_letterVerticesG);
+				vertices = g_letterVerticesG;
+				break;
+
+			case 'M':
+				vertexCount = arrayCount(g_letterVerticesM);
+				vertices = g_letterVerticesM;
+				break;
+
+			case 'O':
+				vertexCount = arrayCount(g_letterVerticesO);
+				vertices = g_letterVerticesO;
+				break;
+
+			case 'R':
+				vertexCount = arrayCount(g_letterVerticesR);
+				vertices = g_letterVerticesR;
+				break;
+
+			case 'V':
+				vertexCount = arrayCount(g_letterVerticesV);
+				vertices = g_letterVerticesV;
+				break;
+			}
+			for (int j = 0; j < vertexCount; ++j) {
+				transformedLetterVertices[j] = modelMatrix * vertices[j];
+			}
+			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedLetterVertices);
+			glDrawArrays(GL_LINES, 0, vertexCount);
+		}
 	}
 
 	for (int i = 0; i < BUTTONS_COUNT; ++i) {
