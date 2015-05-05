@@ -418,6 +418,8 @@ struct Ufo {
 	float nextShotDuration;
 };
 
+// @GLOBALS
+
 Input g_input;
 
 static GLint g_positionAttrib;
@@ -439,6 +441,7 @@ static Ufo g_ufo;
 static float g_nextUfoTimer;
 static float g_nextUfoDuration;
 static int g_playerLivesCount;
+static int g_score;
 
 #define GAME_OVER_DURATION 1.0f
 static float g_gameOverTimer;
@@ -628,7 +631,8 @@ static void startLevel() {
 
 static void startGame() {
 	g_currentLevel = 2;
-	g_playerLivesCount = 1;
+	g_playerLivesCount = 3;
+	g_score = 0;
 	g_gameOverTimer = 0;
 	g_restartingCounter = 3;
 	g_restartingTimer = 0;
@@ -1179,6 +1183,17 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (isPointInPolygon(g_bullets[i].position, asteroid->transformedPolygon, asteroid->vertexCount)) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
+				if (g_bullets[i].player) {
+					if (asteroid->scale == ASTEROID_SCALE_BIG) {
+						g_score += 20;
+					}
+					else if (asteroid->scale == ASTEROID_SCALE_MEDIUM) {
+						g_score += 50;
+					}
+					else {
+						g_score += 100;
+					}
+				}
 				break;
 			}
 		}
@@ -1188,6 +1203,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 			g_bullets[i].active = false;
 			g_ufo.active = false;
 			createExplosion(g_ufo.position);
+			g_score += 200;
 		}
 	}
 
@@ -1355,7 +1371,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 #endif
 
 	for (int i = 0; i < g_playerLivesCount; i++) {
-		mat4 translationMatrix = createTranslationMatrix(30 + i * 21, 480);
+		mat4 translationMatrix = createTranslationMatrix(30 + i * 21, 460);
 		mat4 scaleMatrix = createScaleMatrix(12.0f);
 		mat4 modelMatrix = translationMatrix * scaleMatrix;
 		vec2 transformedShipVertices[arrayCount(g_player.shipVertices)];
@@ -1371,10 +1387,14 @@ void gameUpdateAndRender(float dt, float *touches) {
 		button->wasDown = button->isDown;
 	}
 
+	char scoreStr[16];
+	sprintf(scoreStr, "%d", g_score);
+	drawString(scoreStr, strlen(scoreStr), 30, 500);
+
 	if (g_playerLivesCount <= 0) {
 		if (g_restartingCounter > 0) {
 			char gameOverStr[] = "GAME OVER";
-			drawString(gameOverStr, arrayCount(gameOverStr) - 1, 370, 340);
+			drawString(gameOverStr, strlen(gameOverStr), 370, 340);
 		}
 
 		g_gameOverTimer += dt;
