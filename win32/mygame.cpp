@@ -919,7 +919,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 	float blueColor[] = { 0.0f, 0.0f, 1.0f, 1.0f };
 	glUniform4fv(g_colorUniform, 1, whiteColor);
 
-#if 1
+#if 0
 	GLfloat border[] = { 0.0f, 0.0f,
 		0.0f, SCREEN_HEIGHT - 1.0f,
 		SCREEN_WIDTH - 1.0f, SCREEN_HEIGHT - 1.0f,
@@ -1079,10 +1079,6 @@ void gameUpdateAndRender(float dt, float *touches) {
 			if (!str[i]) {
 				break;
 			}
-			mat4 translationMatrix = createTranslationMatrix(370 + i * 27, 300);
-			mat4 scaleMatrix = createScaleMatrix(10.0f);
-			mat4 modelMatrix = translationMatrix * scaleMatrix;
-			vec2 transformedLetterVertices[64];
 			int vertexCount = 0;
 			vec2 *vertices = 0;
 			switch (str[i]) {
@@ -1121,11 +1117,17 @@ void gameUpdateAndRender(float dt, float *touches) {
 				vertices = g_letterVerticesV;
 				break;
 			}
-			for (int j = 0; j < vertexCount; ++j) {
-				transformedLetterVertices[j] = modelMatrix * vertices[j];
+			if (vertices) {
+				mat4 translationMatrix = createTranslationMatrix(370 + i * 27, 300);
+				mat4 scaleMatrix = createScaleMatrix(10.0f);
+				mat4 modelMatrix = translationMatrix * scaleMatrix;
+				vec2 transformedLetterVertices[64];
+				for (int j = 0; j < vertexCount; ++j) {
+					transformedLetterVertices[j] = modelMatrix * vertices[j];
+				}
+				glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedLetterVertices);
+				glDrawArrays(GL_LINES, 0, vertexCount);
 			}
-			glVertexAttribPointer(g_positionAttrib, 2, GL_FLOAT, GL_FALSE, 0, transformedLetterVertices);
-			glDrawArrays(GL_LINES, 0, vertexCount);
 		}
 	}
 
