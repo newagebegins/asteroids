@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <assert.h>
+#include <string.h>
 #ifdef _WIN32
 #include "gl3w.h"
 #else
@@ -426,7 +427,7 @@ static Asteroid g_asteroids[20];
 static ShipFragment g_shipFragments[5];
 static Bullet g_bullets[32];
 static float g_levelEndTimer;
-static int g_currentLevel = 2;
+static int g_currentLevel;
 static float g_windowWidth;
 static float g_windowHeight;
 static float g_viewportX;
@@ -437,7 +438,14 @@ static ExplosionParticle g_explosionParticles[30];
 static Ufo g_ufo;
 static float g_nextUfoTimer;
 static float g_nextUfoDuration;
-static int g_playerLivesCount = 3;
+static int g_playerLivesCount;
+
+#define GAME_OVER_DURATION 1.0f
+static float g_gameOverTimer;
+
+static int g_restartingCounter;
+#define RESTARTING_DURATION 1.0f
+static float g_restartingTimer;
 
 static void transformAsteroid(Asteroid *asteroid) {
 	mat4 translationMatrix = createTranslationMatrix(asteroid->position.x, asteroid->position.y);
@@ -509,6 +517,7 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 }
 
 static void destroyPlayer() {
+	assert(g_playerLivesCount > 0);
 	g_player.alive = false;
 	g_player.reviveTimer = 0;
 	g_playerLivesCount--;
@@ -578,6 +587,9 @@ static void startLevel() {
 	initPlayer(&g_player);
 	g_levelEndTimer = 0.0f;
 
+	for (int i = 0; i < arrayCount(g_asteroids); ++i) {
+		g_asteroids[i].active = false;
+	}
 	for (int i = 0; i < 1 + g_currentLevel; ++i) {
 		// Start position should be along the screen fringe to avoid collisions
 		// with the player ship.
@@ -602,6 +614,25 @@ static void startLevel() {
 		vec2 velocity = randomDirection() * randomFloat(20, 100);
 		createAsteroid(&g_asteroids[i], position, velocity, ASTEROID_SCALE_BIG);
 	}
+
+	for (int i = 0; i < arrayCount(g_bullets); ++i) {
+		g_bullets[i].active = false;
+	}
+	for (int i = 0; i < arrayCount(g_explosionParticles); ++i) {
+		g_explosionParticles[i].active = false;
+	}
+	
+	g_ufo.active = false;
+	g_nextUfoTimer = 0;
+}
+
+static void startGame() {
+	g_currentLevel = 2;
+	g_playerLivesCount = 1;
+	g_gameOverTimer = 0;
+	g_restartingCounter = 3;
+	g_restartingTimer = 0;
+	startLevel();
 }
 
 void setViewport(float windowWidth, float windowHeight) {
@@ -851,7 +882,7 @@ bool initGame() {
 	triangulatePolygon(g_ufo.outlineVertices, arrayCount(g_ufo.outlineVertices), g_ufo.collisionTriangles, &g_ufo.collisionVertexCount);
 	g_nextUfoDuration = 0.0f;
 
-	startLevel();
+	startGame();
 	return true;
 }
 
@@ -1335,16 +1366,49 @@ void gameUpdateAndRender(float dt, float *touches) {
 		glDrawArrays(GL_LINES, 0, arrayCount(transformedShipVertices));
 	}
 
-	/*char str[] = "RESTARTING IN 0123456789 GO!";
-	drawString(str, arrayCount(str) - 1, 100, 300);*/
-
-	if (g_playerLivesCount <= 0) {
-		char str[] = "GAME OVER";
-		drawString(str, arrayCount(str) - 1, 370, 300);
-	}
-
 	for (int i = 0; i < BUTTONS_COUNT; ++i) {
 		Button *button = &g_input.buttons[i];
 		button->wasDown = button->isDown;
+	}
+
+	if (g_playerLivesCount <= 0) {
+		if (g_restartingCounter > 0) {
+			char gameOverStr[] = "GAME OVER";
+			drawString(gameOverStr, arrayCount(gameOverStr) - 1, 370, 340);
+		}
+
+		g_gameOverTimer += dt;
+		if (g_gameOverTimer > GAME_OVER_DURATION) {
+			char restartingStr[] = "RESTARTING IN 3";
+			float x = 290, y = 280;
+			switch (g_restartingCounter) {
+			case 2:
+				restartingStr[14] = '2';
+				break;
+			case 1:
+				restartingStr[14] = '1';
+				break;
+			case 0:
+				restartingStr[0] = 'G';
+				restartingStr[1] = 'O';
+				restartingStr[2] = '!';
+				restartingStr[3] = '\0';
+				x = 460;
+				break;
+			}
+			
+			if (restartingStr) {
+				drawString(restartingStr, strlen(restartingStr), x, y);
+			}
+
+			g_restartingTimer += dt;
+			if (g_restartingTimer > RESTARTING_DURATION) {
+				g_restartingTimer = 0;
+				g_restartingCounter--;
+				if (g_restartingCounter < 0) {
+					startGame();
+				}
+			}
+		}
 	}
 }
