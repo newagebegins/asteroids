@@ -20,9 +20,6 @@
 #define PLAYER_REVIVE_DURATION 1.0f
 #define BULLET_SPEED 600.0f
 #define MAX_BULLET_DISTANCE 400.0f
-#define ASTEROID_SCALE_SMALL 20
-#define ASTEROID_SCALE_MEDIUM 60
-#define ASTEROID_SCALE_BIG 90
 #define LEVEL_END_DURATION 2.0f
 
 #define arrayCount(array) (sizeof(array) / sizeof((array)[0]))
@@ -106,12 +103,19 @@ static void initPlayer(Player *player) {
 	transformPlayer(player);
 }
 
+enum AsteroidSize {
+	Small,
+	Medium,
+	Big,
+};
+
 #define MAX_ASTEROID_COLLISION_VERTEX_COUNT 64
 struct Asteroid {
 	bool active;
 	vec2 position;
 	vec2 velocity;
 	float scale;
+	AsteroidSize size;
 	vec2 *vertices;
 	int vertexCount;
 	vec2 transformedPolygon[64];
@@ -418,8 +422,6 @@ struct Ufo {
 	float nextShotDuration;
 };
 
-// @GLOBALS
-
 Input g_input;
 
 static GLint g_positionAttrib;
@@ -479,11 +481,10 @@ static void transformUfo(Ufo *ufo) {
 	ufo->bounds = getPolygonBounds(ufo->transformedOutlineVertices, arrayCount(ufo->outlineVertices));
 }
 
-static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, float scale) {
+static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, AsteroidSize size) {
 	asteroid->active = true;
 	asteroid->position = position;
 	asteroid->velocity = velocity;
-	asteroid->scale = scale;
 	int type = randomInt(1, 4);
 
 	switch (type) {
@@ -513,6 +514,20 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 		asteroid->vertexCount = arrayCount(g_asteroidVertices4);
 		asteroid->collisionTriangles = g_asteroidCollisionTriangles4;
 		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount4;
+		break;
+	}
+
+	asteroid->size = size;
+
+	switch (size) {
+	case Small:
+		asteroid->scale = 20;
+		break;
+	case Medium:
+		asteroid->scale = 60;
+		break;
+	case Big:
+		asteroid->scale = 90;
 		break;
 	}
 
@@ -556,7 +571,7 @@ static void createExplosion(vec2 position) {
 
 static void destroyAsteroid(Asteroid *asteroid) {
 	// Split the asteroid into smaller ones.
-	if (asteroid->scale > ASTEROID_SCALE_SMALL) {
+	if (asteroid->size > Small) {
 		for (int j = 0; j < 2; ++j) {
 			for (int i = 0; i < arrayCount(g_asteroids); ++i) {
 				if (g_asteroids[i].active) {
@@ -569,15 +584,12 @@ static void destroyAsteroid(Asteroid *asteroid) {
 				float speed = len(asteroid->velocity) * randSpeedCoeff;
 				vec2 velocity = Vec2(cosf(randVelAngle), sinf(randVelAngle)) * speed;
 
-				float scale = 0.0f;
-				if (asteroid->scale == ASTEROID_SCALE_BIG) {
-					scale = ASTEROID_SCALE_MEDIUM;
-				}
-				else {
-					scale = ASTEROID_SCALE_SMALL;
+				AsteroidSize size = Small;
+				if (asteroid->size == Big) {
+					size = Medium;
 				}
 
-				createAsteroid(&g_asteroids[i], asteroid->position, velocity, scale);
+				createAsteroid(&g_asteroids[i], asteroid->position, velocity, size);
 				break;
 			}
 		}
@@ -615,7 +627,7 @@ static void startLevel() {
 		}
 		vec2 position = Vec2(x, y);
 		vec2 velocity = randomDirection() * randomFloat(20, 100);
-		createAsteroid(&g_asteroids[i], position, velocity, ASTEROID_SCALE_BIG);
+		createAsteroid(&g_asteroids[i], position, velocity, Big);
 	}
 
 	for (int i = 0; i < arrayCount(g_bullets); ++i) {
@@ -1184,10 +1196,10 @@ void gameUpdateAndRender(float dt, float *touches) {
 				g_bullets[i].active = false;
 				destroyAsteroid(asteroid);
 				if (g_bullets[i].player) {
-					if (asteroid->scale == ASTEROID_SCALE_BIG) {
+					if (asteroid->size == Big) {
 						g_score += 20;
 					}
-					else if (asteroid->scale == ASTEROID_SCALE_MEDIUM) {
+					else if (asteroid->size == Medium) {
 						g_score += 50;
 					}
 					else {
@@ -1371,7 +1383,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 #endif
 
 	for (int i = 0; i < g_playerLivesCount; i++) {
-		mat4 translationMatrix = createTranslationMatrix(30 + i * 21, 460);
+		mat4 translationMatrix = createTranslationMatrix(30.0f + i * 21.0f, 460.0f);
 		mat4 scaleMatrix = createScaleMatrix(12.0f);
 		mat4 modelMatrix = translationMatrix * scaleMatrix;
 		vec2 transformedShipVertices[arrayCount(g_player.shipVertices)];
@@ -1388,7 +1400,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 	}
 
 	char scoreStr[16];
-	sprintf(scoreStr, "%d", g_score);
+	sprintf_s(scoreStr, "%d", g_score);
 	drawString(scoreStr, strlen(scoreStr), 30, 500);
 
 	if (g_playerLivesCount <= 0) {
