@@ -120,7 +120,7 @@ struct Asteroid {
 	MyRectangle bounds;
 };
 
-vec2 asteroidVertices1[] = {
+static vec2 asteroidVertices1[] = {
 	Vec2(-0.5f, 0.8f),
 	Vec2(-0.3f, 0.4f),
 	Vec2(-0.9f, 0.4f),
@@ -134,10 +134,10 @@ vec2 asteroidVertices1[] = {
 	Vec2(0.9f, 0.4f),
 	Vec2(0.2f, 0.8f),
 };
-vec2 asteroidCollisionTriangles1[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-int asteroidCollisionVertexCount1;
+static vec2 asteroidCollisionTriangles1[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int asteroidCollisionVertexCount1;
 
-vec2 asteroidVertices2[] = {
+static vec2 asteroidVertices2[] = {
 	Vec2(-0.4f, 0.7f),
 	Vec2(-0.7f, 0.4f),
 	Vec2(-0.6f, 0.0f),
@@ -151,10 +151,10 @@ vec2 asteroidVertices2[] = {
 	Vec2(0.4f, 0.7f),
 	Vec2(0.0f, 0.6f),
 };
-vec2 asteroidCollisionTriangles2[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-int asteroidCollisionVertexCount2;
+static vec2 asteroidCollisionTriangles2[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int asteroidCollisionVertexCount2;
 
-vec2 asteroidVertices3[] = {
+static vec2 asteroidVertices3[] = {
 	Vec2(-0.3f, 0.7f),
 	Vec2(-0.7f, 0.5f),
 	Vec2(-0.7f, -0.3f),
@@ -166,10 +166,10 @@ vec2 asteroidVertices3[] = {
 	Vec2(0.4f, 0.6f),
 	Vec2(0.1f, 0.4f),
 };
-vec2 asteroidCollisionTriangles3[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-int asteroidCollisionVertexCount3;
+static vec2 asteroidCollisionTriangles3[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int asteroidCollisionVertexCount3;
 
-vec2 asteroidVertices4[] = {
+static vec2 asteroidVertices4[] = {
 	Vec2(-0.3f, 0.5f),
 	Vec2(-0.6f, 0.2f),
 	Vec2(-0.3f, 0.0f),
@@ -182,8 +182,8 @@ vec2 asteroidVertices4[] = {
 	Vec2(0.6f, 0.2f),
 	Vec2(0.2f, 0.5f),
 };
-vec2 asteroidCollisionTriangles4[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-int asteroidCollisionVertexCount4;
+static vec2 asteroidCollisionTriangles4[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int asteroidCollisionVertexCount4;
 
 struct ShipFragment {
 	vec2 position;
