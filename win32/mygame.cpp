@@ -120,7 +120,7 @@ struct Asteroid {
 	MyRectangle bounds;
 };
 
-static vec2 asteroidVertices1[] = {
+static vec2 g_asteroidVertices1[] = {
 	Vec2(-0.5f, 0.8f),
 	Vec2(-0.3f, 0.4f),
 	Vec2(-0.9f, 0.4f),
@@ -134,10 +134,10 @@ static vec2 asteroidVertices1[] = {
 	Vec2(0.9f, 0.4f),
 	Vec2(0.2f, 0.8f),
 };
-static vec2 asteroidCollisionTriangles1[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-static int asteroidCollisionVertexCount1;
+static vec2 g_asteroidCollisionTriangles1[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int g_asteroidCollisionVertexCount1;
 
-static vec2 asteroidVertices2[] = {
+static vec2 g_asteroidVertices2[] = {
 	Vec2(-0.4f, 0.7f),
 	Vec2(-0.7f, 0.4f),
 	Vec2(-0.6f, 0.0f),
@@ -151,10 +151,10 @@ static vec2 asteroidVertices2[] = {
 	Vec2(0.4f, 0.7f),
 	Vec2(0.0f, 0.6f),
 };
-static vec2 asteroidCollisionTriangles2[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-static int asteroidCollisionVertexCount2;
+static vec2 g_asteroidCollisionTriangles2[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int g_asteroidCollisionVertexCount2;
 
-static vec2 asteroidVertices3[] = {
+static vec2 g_asteroidVertices3[] = {
 	Vec2(-0.3f, 0.7f),
 	Vec2(-0.7f, 0.5f),
 	Vec2(-0.7f, -0.3f),
@@ -166,10 +166,10 @@ static vec2 asteroidVertices3[] = {
 	Vec2(0.4f, 0.6f),
 	Vec2(0.1f, 0.4f),
 };
-static vec2 asteroidCollisionTriangles3[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-static int asteroidCollisionVertexCount3;
+static vec2 g_asteroidCollisionTriangles3[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int g_asteroidCollisionVertexCount3;
 
-static vec2 asteroidVertices4[] = {
+static vec2 g_asteroidVertices4[] = {
 	Vec2(-0.3f, 0.5f),
 	Vec2(-0.6f, 0.2f),
 	Vec2(-0.3f, 0.0f),
@@ -182,8 +182,8 @@ static vec2 asteroidVertices4[] = {
 	Vec2(0.6f, 0.2f),
 	Vec2(0.2f, 0.5f),
 };
-static vec2 asteroidCollisionTriangles4[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
-static int asteroidCollisionVertexCount4;
+static vec2 g_asteroidCollisionTriangles4[MAX_ASTEROID_COLLISION_VERTEX_COUNT];
+static int g_asteroidCollisionVertexCount4;
 
 struct ShipFragment {
 	vec2 position;
@@ -287,31 +287,31 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, flo
 
 	switch (type) {
 	case 1:
-		asteroid->vertices = asteroidVertices1;
-		asteroid->vertexCount = arrayCount(asteroidVertices1);
-		asteroid->collisionTriangles = asteroidCollisionTriangles1;
-		asteroid->collisionVertexCount = asteroidCollisionVertexCount1;
+		asteroid->vertices = g_asteroidVertices1;
+		asteroid->vertexCount = arrayCount(g_asteroidVertices1);
+		asteroid->collisionTriangles = g_asteroidCollisionTriangles1;
+		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount1;
 		break;
 
 	case 2:
-		asteroid->vertices = asteroidVertices2;
-		asteroid->vertexCount = arrayCount(asteroidVertices2);
-		asteroid->collisionTriangles = asteroidCollisionTriangles2;
-		asteroid->collisionVertexCount = asteroidCollisionVertexCount2;
+		asteroid->vertices = g_asteroidVertices2;
+		asteroid->vertexCount = arrayCount(g_asteroidVertices2);
+		asteroid->collisionTriangles = g_asteroidCollisionTriangles2;
+		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount2;
 		break;
 
 	case 3:
-		asteroid->vertices = asteroidVertices3;
-		asteroid->vertexCount = arrayCount(asteroidVertices3);
-		asteroid->collisionTriangles = asteroidCollisionTriangles3;
-		asteroid->collisionVertexCount = asteroidCollisionVertexCount3;
+		asteroid->vertices = g_asteroidVertices3;
+		asteroid->vertexCount = arrayCount(g_asteroidVertices3);
+		asteroid->collisionTriangles = g_asteroidCollisionTriangles3;
+		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount3;
 		break;
 
 	case 4:
-		asteroid->vertices = asteroidVertices4;
-		asteroid->vertexCount = arrayCount(asteroidVertices4);
-		asteroid->collisionTriangles = asteroidCollisionTriangles4;
-		asteroid->collisionVertexCount = asteroidCollisionVertexCount4;
+		asteroid->vertices = g_asteroidVertices4;
+		asteroid->vertexCount = arrayCount(g_asteroidVertices4);
+		asteroid->collisionTriangles = g_asteroidCollisionTriangles4;
+		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount4;
 		break;
 	}
 
@@ -509,10 +509,10 @@ bool initGame() {
 	g_player.flameVertices[2] = Vec2(0.3f, -0.49f);
 	g_player.flameVertices[3] = Vec2(0.0f, -1.0f);
 
-	triangulatePolygon(asteroidVertices1, arrayCount(asteroidVertices1), asteroidCollisionTriangles1, &asteroidCollisionVertexCount1);
-	triangulatePolygon(asteroidVertices2, arrayCount(asteroidVertices2), asteroidCollisionTriangles2, &asteroidCollisionVertexCount2);
-	triangulatePolygon(asteroidVertices3, arrayCount(asteroidVertices3), asteroidCollisionTriangles3, &asteroidCollisionVertexCount3);
-	triangulatePolygon(asteroidVertices4, arrayCount(asteroidVertices4), asteroidCollisionTriangles4, &asteroidCollisionVertexCount4);
+	triangulatePolygon(g_asteroidVertices1, arrayCount(g_asteroidVertices1), g_asteroidCollisionTriangles1, &g_asteroidCollisionVertexCount1);
+	triangulatePolygon(g_asteroidVertices2, arrayCount(g_asteroidVertices2), g_asteroidCollisionTriangles2, &g_asteroidCollisionVertexCount2);
+	triangulatePolygon(g_asteroidVertices3, arrayCount(g_asteroidVertices3), g_asteroidCollisionTriangles3, &g_asteroidCollisionVertexCount3);
+	triangulatePolygon(g_asteroidVertices4, arrayCount(g_asteroidVertices4), g_asteroidCollisionTriangles4, &g_asteroidCollisionVertexCount4);
 
 	g_ufo.outlineVertices[0] = Vec2(-0.3f, 0.4f);
 	g_ufo.outlineVertices[1] = Vec2(-0.4f, 0.1f);
