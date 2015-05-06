@@ -481,11 +481,23 @@ static void transformUfo(Ufo *ufo) {
 	ufo->bounds = getPolygonBounds(ufo->transformedOutlineVertices, arrayCount(ufo->outlineVertices));
 }
 
-static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, AsteroidSize size) {
+static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, AsteroidSize size, int type) {
 	asteroid->active = true;
 	asteroid->position = position;
 	asteroid->velocity = velocity;
-	int type = randomInt(1, 4);
+
+	asteroid->size = size;
+	switch (size) {
+	case Small:
+		asteroid->scale = 20;
+		break;
+	case Medium:
+		asteroid->scale = 60;
+		break;
+	case Big:
+		asteroid->scale = 90;
+		break;
+	}
 
 	switch (type) {
 	case 1:
@@ -500,6 +512,7 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, Ast
 		asteroid->vertexCount = arrayCount(g_asteroidVertices2);
 		asteroid->collisionTriangles = g_asteroidCollisionTriangles2;
 		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount2;
+		asteroid->scale *= 1.2f;
 		break;
 
 	case 3:
@@ -507,6 +520,7 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, Ast
 		asteroid->vertexCount = arrayCount(g_asteroidVertices3);
 		asteroid->collisionTriangles = g_asteroidCollisionTriangles3;
 		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount3;
+		asteroid->scale *= 1.2f;
 		break;
 
 	case 4:
@@ -514,20 +528,7 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, Ast
 		asteroid->vertexCount = arrayCount(g_asteroidVertices4);
 		asteroid->collisionTriangles = g_asteroidCollisionTriangles4;
 		asteroid->collisionVertexCount = g_asteroidCollisionVertexCount4;
-		break;
-	}
-
-	asteroid->size = size;
-
-	switch (size) {
-	case Small:
-		asteroid->scale = 20;
-		break;
-	case Medium:
-		asteroid->scale = 60;
-		break;
-	case Big:
-		asteroid->scale = 90;
+		asteroid->scale *= 1.43f;
 		break;
 	}
 
@@ -589,7 +590,7 @@ static void destroyAsteroid(Asteroid *asteroid) {
 					size = Medium;
 				}
 
-				createAsteroid(&g_asteroids[i], asteroid->position, velocity, size);
+				createAsteroid(&g_asteroids[i], asteroid->position, velocity, size, randomInt(1, 4));
 				break;
 			}
 		}
@@ -627,7 +628,7 @@ static void startLevel() {
 		}
 		vec2 position = Vec2(x, y);
 		vec2 velocity = randomDirection() * randomFloat(20, 100);
-		createAsteroid(&g_asteroids[i], position, velocity, Big);
+		createAsteroid(&g_asteroids[i], position, velocity, Big, randomInt(1, 4));
 	}
 
 	for (int i = 0; i < arrayCount(g_bullets); ++i) {
@@ -649,6 +650,11 @@ static void startGame() {
 	g_restartingCounter = 3;
 	g_restartingTimer = 0;
 	startLevel();
+
+	/*createAsteroid(&g_asteroids[0], Vec2(100, 100), Vec2(0, 0), Big, 1);
+	createAsteroid(&g_asteroids[1], Vec2(250, 100), Vec2(0, 0), Big, 2);
+	createAsteroid(&g_asteroids[2], Vec2(400, 100), Vec2(0, 0), Big, 3);
+	createAsteroid(&g_asteroids[3], Vec2(550, 100), Vec2(0, 0), Big, 4);*/
 }
 
 void setViewport(float windowWidth, float windowHeight) {
