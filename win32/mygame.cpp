@@ -489,13 +489,13 @@ static void createAsteroid(Asteroid *asteroid, vec2 position, vec2 velocity, Ast
 	asteroid->size = size;
 	switch (size) {
 	case Small:
-		asteroid->scale = 20;
+		asteroid->scale = 15;
 		break;
 	case Medium:
-		asteroid->scale = 60;
+		asteroid->scale = 30;
 		break;
 	case Big:
-		asteroid->scale = 90;
+		asteroid->scale = 60;
 		break;
 	}
 
@@ -954,7 +954,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 #endif
 
 	if (g_player.alive) {
-		float rotationSpeed = 7.0f;
+		float rotationSpeed = 5.0f;
 		if (g_input.rightButton.isDown) {
 			g_player.angle -= rotationSpeed*dt;
 		}
