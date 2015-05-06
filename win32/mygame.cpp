@@ -570,6 +570,10 @@ static void createExplosion(vec2 position) {
 	}
 }
 
+static int randomAsteroidType() {
+	return randomInt(1, 4);
+}
+
 static void destroyAsteroid(Asteroid *asteroid) {
 	// Split the asteroid into smaller ones.
 	if (asteroid->size > Small) {
@@ -590,7 +594,7 @@ static void destroyAsteroid(Asteroid *asteroid) {
 					size = Medium;
 				}
 
-				createAsteroid(&g_asteroids[i], asteroid->position, velocity, size, randomInt(1, 4));
+				createAsteroid(&g_asteroids[i], asteroid->position, velocity, size, randomAsteroidType());
 				break;
 			}
 		}
@@ -628,7 +632,7 @@ static void startLevel() {
 		}
 		vec2 position = Vec2(x, y);
 		vec2 velocity = randomDirection() * randomFloat(20, 100);
-		createAsteroid(&g_asteroids[i], position, velocity, Big, randomInt(1, 4));
+		createAsteroid(&g_asteroids[i], position, velocity, Big, randomAsteroidType());
 	}
 
 	for (int i = 0; i < arrayCount(g_bullets); ++i) {
