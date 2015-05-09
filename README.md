@@ -11,7 +11,7 @@ Right arrow - turn right
 Up arrow - move forward  
 Spacebar - shoot
 
-Android version uses onscreen buttons.
+Android version uses on-screen buttons.
 
 ## Gameplay GIF
 
