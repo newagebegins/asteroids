@@ -5,7 +5,7 @@ A simple cross-platform implementation of the classic Asteroids game written in 
 
 ## Controls
 
-Windows:
+On Windows:  
 Left arrow - turn left  
 Right arrow - turn right  
 Up arrow - move forward  
