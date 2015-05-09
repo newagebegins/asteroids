@@ -59,7 +59,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR /
 	wc.lpfnWndProc = wndProc;
 	wc.hInstance = hInstance;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.lpszClassName = "MyGameWindowClass";
+	wc.lpszClassName = "AsteroidsWindowClass";
 
 	if (!RegisterClass(&wc)) {
 		MessageBox(NULL, "RegisterClass failed!", NULL, NULL);
@@ -72,7 +72,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR /
 	HWND hWnd = CreateWindowEx(
 		NULL,
 		wc.lpszClassName,
-		"MyGame",
+		"Asteroids",
 		windowStyle,
 		300, 0,
 		clientRect.right - clientRect.left, clientRect.bottom - clientRect.top,
