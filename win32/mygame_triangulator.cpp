@@ -1,6 +1,9 @@
 #include <assert.h>
 #include "mygame_triangulator.h"
 
+// The triangulator code is borrowed from LibGDX
+// https://github.com/libgdx/libgdx/blob/master/gdx/src/com/badlogic/gdx/math/EarClippingTriangulator.java
+
 #define CONCAVE -1
 #define TANGENTIAL 0
 #define CONVEX 1
