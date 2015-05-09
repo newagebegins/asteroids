@@ -6,5 +6,6 @@
 Thumbs.db
 *.suo
 /win32/Debug/
+/win32/Release/
 *.opensdf
 *.sdf
