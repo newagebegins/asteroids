@@ -1410,7 +1410,7 @@ void gameUpdateAndRender(float dt, float *touches) {
 	}
 
 	char scoreStr[16];
-	sprintf_s(scoreStr, "%d", g_score);
+	sprintf(scoreStr, "%d", g_score);
 	drawString(scoreStr, strlen(scoreStr), 30, 500);
 
 	if (g_playerLivesCount <= 0) {
