@@ -53,10 +53,7 @@ static LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return 0;
 }
 
-int CALLBACK WinMain(HINSTANCE hInstance,
-	HINSTANCE /* hPrevInstance */,
-	LPSTR /* lpCmdLine */,
-	int nCmdShow) {
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR /* lpCmdLine */, int nCmdShow) {
 	WNDCLASS wc = {};
 	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = wndProc;
